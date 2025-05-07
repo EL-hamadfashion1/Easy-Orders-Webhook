@@ -1,0 +1,17 @@
+{
+  "name": "easy-orders-webhook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Webhook.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "express": "^5.1.0"
+  }
+}
