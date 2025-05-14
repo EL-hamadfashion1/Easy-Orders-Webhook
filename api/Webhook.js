@@ -202,6 +202,8 @@ app.post("/webhook/verify", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Webhook server running on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Webhook server running on port ${port}`);
+// });
+const serverless = require("serverless-http");
+module.exports.handler = serverless(app);
