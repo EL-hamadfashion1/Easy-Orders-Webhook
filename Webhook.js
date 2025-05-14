@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 const ACCESS_TOKEN =
-  "EAAa3BG4Yyp4BOZCZBIdZB11V4oqIqCmoWZBvQbZBR6k19XHZApVZCUZB60ZAJknC6r6wZA9c7ZBGcgxNWxcylFNa5A9IeHmYk0ZCMyB4P27cuQZCioN8W33JPlcZBqsd3pmZAZCaKQVLlUHE4JLr1S2kCis6fj0vElEedr1ZAjcrw7ZBBZAijZBD0RqiT8WGjnEBVHXZCAj5xHJ9ujOQR7OciYM32DMAlNtAuaF8fTL8ZD"; // ضع التوكن الصحيح هنا
+  "EAAa3BG4Yyp4BO5sZAFPAY9G93AByskQj0aAjqdV3opricSZAnKuYBTg9iTCqZCqRNKqKs4IbIhVyzEAgrLZBZCTVBp1zze0GgsXy7KeHOcmDbI13BZBFmkCitUjvE5peHDYz0hwTHvOnma9YQqcUfGp9CFG6lRScdarvVE0RDH3TOJBljMCZAZAozpHBhevGPdZBZCehokt5KYeSmWnP9MlgsXbYxPWrAiIQZDZD"; // ضع التوكن الصحيح هنا
 const EASY_ORDERS_API_TOKEN = "24133ac9-6de9-4b77-b3c5-cdd2b8d2c139";
 const VERIFY_TOKEN = "easyorders123";
 
@@ -31,7 +31,7 @@ app.get("/webhook/meta", (req, res) => {
 });
 
 app.get("/current-phone", (req, res) => {
-  res.json({ phone_number: currentPhoneNumber });
+  res.status(200).json({ phone_number: currentPhoneNumber });
 });
 
 app.post("/webhook/meta", async (req, res) => {
@@ -58,10 +58,6 @@ app.post("/webhook/meta", async (req, res) => {
         const phoneNumberId = value.metadata.phone_number_id;
         console.log("=================>" + phoneNumberId);
         console.log("-> Phone Number pure : " + phoneNumber);
-        // console.log(
-        //   "-> Phone Number from doc type : " +
-        //     document.getElementById("phoneNumber").value
-        // );
 
         phoneNumberIds[phoneNumber] = phoneNumberId;
 
@@ -107,7 +103,6 @@ app.post("/webhook/meta", async (req, res) => {
         console.log(
           `Status update: ${status.status} for message ${status.id} to ${status.recipient_id}`
         );
-        // هنا ممكن تضيف منطق إضافي لو عايز تعمل حاجة لما الرسالة تتقرأ
       } else {
         console.log("No valid messages or statuses found in the payload");
       }
@@ -158,31 +153,47 @@ app.post("/webhook/verify", async (req, res) => {
       // جلب phoneNumberId عشان نستخدمه في إرسال الرسالة
       const phoneNumberId = phoneNumberIds[phone_number];
       if (!phoneNumberId) {
-        throw new Error(`No phone_number_id found for ${phone_number}`);
+        console.error("No phone_number_id found for", phone_number);
+        return res.status(500).json({
+          success: false,
+          message: "Internal error: phone_number_id not found",
+        });
       }
 
-      // إرسال رسالة "شكرًا لاستخدامك خدمتنا"
+      // here we send a normal message with the link in the message , we have to send with this link order details
       const thankYouMessagePayload = {
         messaging_product: "whatsapp",
         to: phone_number,
         type: "text",
         text: {
-          body: "تم التأكد من كود التحقق بنجاح ,شكرًا لاستخدامك خدمتنا!",
+          body: "تم التأكد من كود التحقق بنجاح، شكرًا لاستخدامك خدمتنا! ابعت تفاصيل طلبك هنا: https://wa.me/201016908760?text=تفاصيل%20طلبي",
         },
       };
 
-      const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
-      const response = await axios.post(url, thankYouMessagePayload, {
-        headers: {
-          Authorization: `Bearer ${ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+        const response = await axios.post(url, thankYouMessagePayload, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+        });
 
-      console.log(
-        "Thank you message sent successfully:",
-        JSON.stringify(response.data, null, 2)
-      );
+        console.log(
+          "Thank you message with URL button sent successfully:",
+          JSON.stringify(response.data, null, 2)
+        );
+      } catch (apiError) {
+        console.error(
+          "WhatsApp API error:",
+          JSON.stringify(
+            apiError.response ? apiError.response.data : apiError.message,
+            null,
+            2
+          )
+        );
+        throw new Error("Failed to send thank you message");
+      }
 
       // امسح الكود بعد التحقق الناجح
       delete confirmationCodes[phone_number];
@@ -202,8 +213,6 @@ app.post("/webhook/verify", async (req, res) => {
   }
 });
 
-// app.listen(port, () => {
-//   console.log(`Webhook server running on port ${port}`);
-// });
-const serverless = require("serverless-http");
-module.exports.handler = serverless(app);
+app.listen(port, () => {
+  console.log(`Webhook server running on port ${port}`);
+});
