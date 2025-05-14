@@ -1,49 +1,51 @@
 const express = require("express");
 const axios = require("axios");
+const cors = require("cors"); // أضف هذا
 const app = express();
 const port = 3000;
 
-// Middleware to parse JSON bodies
 app.use(express.json());
+app.use(cors());
 
-const ACCESS_TOKEN = "YOUR_ACCESS_TOKEN_HERE";
-// WhatsApp Business Account ID
-const WABA_ID = "YOUR_WHATSAPP_BUSINESS_ACCOUNT_ID";
-// Easy Orders API Token
-const EASY_ORDERS_API_TOKEN = "YOUR_EASY_ORDERS_API_TOKEN";
-// Verify Token (from Meta Webhook settings)
-const VERIFY_TOKEN = "YOUR_VERIFY_TOKEN";
+const ACCESS_TOKEN =
+  "EAAa3BG4Yyp4BOZCZBIdZB11V4oqIqCmoWZBvQbZBR6k19XHZApVZCUZB60ZAJknC6r6wZA9c7ZBGcgxNWxcylFNa5A9IeHmYk0ZCMyB4P27cuQZCioN8W33JPlcZBqsd3pmZAZCaKQVLlUHE4JLr1S2kCis6fj0vElEedr1ZAjcrw7ZBBZAijZBD0RqiT8WGjnEBVHXZCAj5xHJ9ujOQR7OciYM32DMAlNtAuaF8fTL8ZD"; // ضع التوكن الصحيح هنا
+const EASY_ORDERS_API_TOKEN = "24133ac9-6de9-4b77-b3c5-cdd2b8d2c139";
+const VERIFY_TOKEN = "easyorders123";
 
-// In-memory storage for confirmation codes (use a database in production)
 const confirmationCodes = {};
-const orderMapping = {}; // Maps phone numbers to order IDs
+const phoneNumberIds = {};
+let currentPhoneNumber = ""; // متغير لتخزين رقم الهاتف الحالي
 
-// Webhook verification endpoint (required by Meta)
 app.get("/webhook/meta", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
-    console.log("Webhook verified");
+    console.log("Webhook verified successfully");
     res.status(200).send(challenge);
   } else {
+    console.log("Webhook verification failed");
     res.status(403).send("Verification failed");
   }
 });
 
-// Webhook endpoint to receive messages from Meta
+app.get("/current-phone", (req, res) => {
+  res.json({ phone_number: currentPhoneNumber });
+});
+
 app.post("/webhook/meta", async (req, res) => {
   try {
     const body = req.body;
+    console.log("Received Webhook payload:", JSON.stringify(body, null, 2));
 
-    // Check if the request contains WhatsApp messages
     if (body.object === "whatsapp_business_account") {
       const entry = body.entry[0];
       const change = entry.changes[0];
       const value = change.value;
 
-      // Check if it's a message and from WhatsApp
+      console.log("Webhook value:", JSON.stringify(value, null, 2));
+
       if (
         value.messages &&
         value.messages[0] &&
@@ -51,129 +53,155 @@ app.post("/webhook/meta", async (req, res) => {
         value.metadata.phone_number_id
       ) {
         const message = value.messages[0];
-        const phoneNumber = message.from; // Customer's phone number
+        const phoneNumber = message.from;
         const messageText = message.text ? message.text.body : "";
+        const phoneNumberId = value.metadata.phone_number_id;
+        console.log("=================>" + phoneNumberId);
+        console.log("-> Phone Number pure : " + phoneNumber);
+        // console.log(
+        //   "-> Phone Number from doc type : " +
+        //     document.getElementById("phoneNumber").value
+        // );
 
-        // Check if the message is "أريد تأكيد طلبي"
-        if (messageText === "أريد تأكيد طلبي") {
-          // Generate or use your manually created confirmation code
+        phoneNumberIds[phoneNumber] = phoneNumberId;
+
+        console.log(`Message received from ${phoneNumber}: ${messageText}`);
+
+        if (messageText === "أريد تأكيد الطلب") {
+          // تحديث رقم الهاتف الحالي
+          currentPhoneNumber = phoneNumber;
+          console.log("=><><><><========= " + currentPhoneNumber);
           const confirmationCode = Math.floor(
             100000 + Math.random() * 900000
-          ).toString(); // Replace with your manual code logic
+          ).toString();
           confirmationCodes[phoneNumber] = confirmationCode;
 
-          // Send the confirmation code
           const messagePayload = {
             messaging_product: "whatsapp",
             to: phoneNumber,
             type: "text",
-            text: {
-              body: `كود تأكيد طلبك هو: ${confirmationCode}`,
-            },
+            text: { body: `كود تأكيد طلبك هو: ${confirmationCode}` },
           };
 
-          await axios.post(
-            `https://graph.facebook.com/v20.0/${WABA_ID}/messages`,
-            messagePayload,
-            {
-              headers: {
-                Authorization: `Bearer ${ACCESS_TOKEN}`,
-                "Content-Type": "application/json",
-              },
-            }
+          console.log(
+            `Sending confirmation code to ${phoneNumber}: ${confirmationCode}`
           );
 
+          const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+          const response = await axios.post(url, messagePayload, {
+            headers: {
+              Authorization: `Bearer ${ACCESS_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          });
+
           console.log(
-            `Confirmation code sent to ${phoneNumber}: ${confirmationCode}`
+            "Confirmation code sent successfully:",
+            JSON.stringify(response.data, null, 2)
           );
+        } else {
+          console.log(`Message "${messageText}" does not match expected text`);
         }
+      } else if (value.statuses && value.statuses[0]) {
+        const status = value.statuses[0];
+        console.log(
+          `Status update: ${status.status} for message ${status.id} to ${status.recipient_id}`
+        );
+        // هنا ممكن تضيف منطق إضافي لو عايز تعمل حاجة لما الرسالة تتقرأ
+      } else {
+        console.log("No valid messages or statuses found in the payload");
       }
+    } else {
+      console.log("Webhook payload is not from WhatsApp");
     }
 
     res.status(200).send("EVENT_RECEIVED");
   } catch (error) {
     console.error(
       "Error processing Meta webhook:",
-      error.response ? error.response.data : error.message
+      JSON.stringify(
+        error.response ? error.response.data : error.message,
+        null,
+        2
+      )
     );
     res.status(500).send("Error processing webhook");
   }
 });
 
-// Endpoint to verify the confirmation code and send order details
 app.post("/webhook/verify", async (req, res) => {
   try {
-    const { phone_number, entered_code, order_id } = req.body;
+    console.log("Received verify payload:", req.body);
+    const body = req.body || {};
+    const { phone_number, entered_code } = body;
 
-    // Check if the entered code matches the stored code
-    if (
-      confirmationCodes[phone_number] &&
-      confirmationCodes[phone_number] === entered_code
-    ) {
-      // Code is correct, fetch order details from Easy Orders API
-      const orderResponse = await axios.get(
-        `https://api.easy-orders.net/v1/orders/${order_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${EASY_ORDERS_API_TOKEN}`,
-          },
-        }
-      );
+    if (!phone_number || !entered_code) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing phone_number or entered_code",
+      });
+    }
 
-      const orderDetails = orderResponse.data;
-      const orderMessage =
-        `تفاصيل طلبك رقم #${order_id}:\n` +
-        `المنتجات: ${
-          orderDetails.items.map((item) => item.name).join(", ") || "غير متوفر"
-        }\n` +
-        `السعر: ${orderDetails.total || "غير متوفر"} SAR\n` +
-        `شكرًا لاختيارك لنا!`;
+    console.log(confirmationCodes);
+    console.log("--------> " + phone_number);
+    console.log("-----" + confirmationCodes[phone_number]);
 
-      // Send the order details via WhatsApp API
-      const messagePayload = {
+    if (!confirmationCodes[phone_number]) {
+      return res.status(400).json({
+        success: false,
+        message: "No confirmation code found for this phone number",
+      });
+    }
+
+    if (confirmationCodes[phone_number] === entered_code) {
+      console.log("Code verified for", phone_number);
+      // جلب phoneNumberId عشان نستخدمه في إرسال الرسالة
+      const phoneNumberId = phoneNumberIds[phone_number];
+      if (!phoneNumberId) {
+        throw new Error(`No phone_number_id found for ${phone_number}`);
+      }
+
+      // إرسال رسالة "شكرًا لاستخدامك خدمتنا"
+      const thankYouMessagePayload = {
         messaging_product: "whatsapp",
         to: phone_number,
         type: "text",
         text: {
-          body: orderMessage,
+          body: "تم التأكد من كود التحقق بنجاح ,شكرًا لاستخدامك خدمتنا!",
         },
       };
 
-      await axios.post(
-        `https://graph.facebook.com/v20.0/${WABA_ID}/messages`,
-        messagePayload,
-        {
-          headers: {
-            Authorization: `Bearer ${ACCESS_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        }
+      const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+      const response = await axios.post(url, thankYouMessagePayload, {
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log(
+        "Thank you message sent successfully:",
+        JSON.stringify(response.data, null, 2)
       );
 
-      console.log(`Order details sent to ${phone_number}`);
-
-      // Remove the code after successful verification
+      // امسح الكود بعد التحقق الناجح
       delete confirmationCodes[phone_number];
+      delete phoneNumberIds[phone_number];
 
-      res.status(200).json({
-        success: true,
-        message: "Code verified and order details sent",
-      });
+      res
+        .status(200)
+        .json({ success: true, message: "Code verified successfully" });
     } else {
       res
         .status(400)
         .json({ success: false, message: "Invalid confirmation code" });
     }
   } catch (error) {
-    console.error(
-      "Error verifying code:",
-      error.response ? error.response.data : error.message
-    );
-    res.status(500).send("Error verifying code");
+    console.error("Error verifying code:", error.message);
+    res.status(500).json({ success: false, message: "Error verifying code" });
   }
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Webhook server running on port ${port}`);
 });

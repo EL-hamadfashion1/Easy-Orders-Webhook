@@ -62,7 +62,12 @@
             cursor: pointer;
         }
 
-        button:hover {
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
             background-color: #0056b3;
         }
 
@@ -77,42 +82,61 @@
     <div class="container">
         <h2>تأكيد الطلب</h2>
         <p>لتأكيد الطلب، تواصل معنا على واتساب:</p>
-        <a href="https://wa.me/01224309198?text=أريد%20تأكيد%20الطلب" target="_blank" class="whatsapp-btn">تواصل معنا
+        <a href="https://wa.me/01022549817?text=أريد%20تأكيد%20الطلب" target="_blank" class="whatsapp-btn">تواصل معنا
             على واتساب</a>
         <div class="code-input">
             <p>أدخل كود التحقق الذي تم إرساله لك:</p>
             <input type="text" id="confirmationCode" placeholder="أدخل الكود هنا">
-            <input type="hidden" id="orderId" value="ORDER_ID_HERE">
-            <input type="hidden" id="phoneNumber" value="PHONE_NUMBER_HERE">
+            <input type="hidden" id="phoneNumber">
             <br>
-            <button onclick="verifyCode()">تأكيد الكود</button>
+            <button onclick="verifyCode()" id="Confirmbtn">تأكيد الكود</button>
             <p id="message" class="message"></p>
         </div>
     </div>
-
     <script>
-        async function verifyCode() {
-            const code = document.getElementById('confirmationCode').value;
-            const orderId = document.getElementById('orderId').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            const messageElement = document.getElementById('message');
+        // دالة لجلب رقم الهاتف الحالي من السيرفر
+        async function getCurrentPhoneNumber() {
+            try {
+                console.log("from get curr");
+                const response = await fetch('https://35e4-102-190-176-101.ngrok-free.app/current-phone');
+                const data = await response.json();
+                console.log("from get curr res", data); // أو استخدم JSON.stringify
 
+                if (data.phone_number) {
+                    document.getElementById('phoneNumber').value = data.phone_number;
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error fetching phone number:', error.message);
+                document.getElementById('message').textContent = 'حدث خطأ في جلب رقم الهاتف';
+                document.getElementById('message').style.color = 'red';
+            }
+        }
+
+        async function verifyCode() {
+            const phoneData = await getCurrentPhoneNumber();
+            console.log(phoneData);
+            const code = document.getElementById('confirmationCode').value;
+            const phoneNumber = "201224309198";
+            const messageElement = document.getElementById('message');
+            const confirmBtn = document.getElementById('Confirmbtn');
+
+            console.log("=======================>" + phoneNumber);
+            //console.log("==============Current Phone Number from func : " + phoneData.phone_number);
             if (!code) {
                 messageElement.textContent = 'يرجى إدخال كود التحقق';
                 return;
             }
 
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'جاري التحقق...';
+
             try {
-                const response = await fetch('https://your-server.com/webhook/verify', {
+                const response = await fetch('https://35e4-102-190-176-101.ngrok-free.app/webhook/verify', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phone_number: phoneNumber,
-                        entered_code: code,
-                        order_id: orderId
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phoneNumber, entered_code: code }),
+                    mode: "cors" // غيّر من no-cors إلى cors
                 });
 
                 const result = await response.json();
@@ -121,11 +145,15 @@
                     messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
                 } else {
                     messageElement.style.color = 'red';
-                    messageElement.textContent = 'كود التحقق غير صحيح، حاول مرة أخرى.';
+                    messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
                 }
             } catch (error) {
                 messageElement.style.color = 'red';
                 messageElement.textContent = 'حدث خطأ أثناء التحقق، حاول مرة أخرى.';
+                console.error('Error:', error);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'تأكيد الكود';
             }
         }
     </script>
