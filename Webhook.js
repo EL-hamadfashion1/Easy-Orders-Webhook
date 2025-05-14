@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 const ACCESS_TOKEN =
-  "EAAa3BG4Yyp4BO5sZAFPAY9G93AByskQj0aAjqdV3opricSZAnKuYBTg9iTCqZCqRNKqKs4IbIhVyzEAgrLZBZCTVBp1zze0GgsXy7KeHOcmDbI13BZBFmkCitUjvE5peHDYz0hwTHvOnma9YQqcUfGp9CFG6lRScdarvVE0RDH3TOJBljMCZAZAozpHBhevGPdZBZCehokt5KYeSmWnP9MlgsXbYxPWrAiIQZDZD"; // ضع التوكن الصحيح هنا
+  "EAAa3BG4Yyp4BO3Rfo0hgY4nItxxnsO7125RLZAf7TpbXbn2ya9yzN83ZAl5sZAWRQ42VzuV7uc9hvdoJXRYfPSIEUoX6OJTS8efD0Y1UZBX39T1SQnua0jLN2TZBvL1wV4huT6ZCkJycecjy4wasb9ZB7y0D4sob8wxKvjXGvERixDZAqu8Y9AWfZAHkS3BlBwtB5CVmCFUquvpQUJL5Uw91ZAHwZCSrIQZD"; // ضع التوكن الصحيح هنا
 const EASY_ORDERS_API_TOKEN = "24133ac9-6de9-4b77-b3c5-cdd2b8d2c139";
 const VERIFY_TOKEN = "easyorders123";
 
@@ -210,6 +210,69 @@ app.post("/webhook/verify", async (req, res) => {
   } catch (error) {
     console.error("Error verifying code:", error.message);
     res.status(500).json({ success: false, message: "Error verifying code" });
+  }
+});
+
+// Endpoint جديدة لاستقبال حدث order created من EasyOrders
+app.post("/webhook/easy-orders", async (req, res) => {
+  try {
+    console.log("from event trig");
+    const body = req.body;
+    console.log(
+      "Received EasyOrders webhook payload:",
+      JSON.stringify(body, null, 2)
+    );
+
+    // التأكد إن الـpayload فيه بيانات الطلب
+    const { id: order_id, phone, cart_items } = body.data;
+
+    // جلب تفاصيل المنتج الأول من cart_items
+    const firstItem = cart_items[0];
+    const product_name = firstItem.product.name || "منتج مجهول";
+    const price = firstItem.price || 0;
+
+    // إنشاء لينك ديناميكي مع تفاصيل الطلب
+    const dynamicUrl = `https://wa.me/201016908760?text=تفاصيل%20طلبي:%20المنتج%20${encodeURIComponent(
+      product_name
+    )}%20-%20السعر%20${price}%20جنيه%20-%20رقم%20الطلب%20${order_id}`;
+
+    // إرسال رسالة شكر للرقم 201016908760
+    const thankYouMessagePayload = {
+      messaging_product: "whatsapp",
+      to: currentPhoneNumber,
+      type: "text",
+      text: {
+        body: `شكرًا على طلبك! تفاصيل طلبك جاهزة هنا: ${dynamicUrl}`,
+      },
+    };
+
+    const phoneId = phoneNumberIds[currentPhoneNumber];
+    console.log("from event trig phonid ===================>" + phoneId);
+
+    const url = `https://graph.facebook.com/v22.0/${phoneId}/messages`; // استبدل 123456789 بـphone_number_id الصحيح
+    const response = await axios.post(url, thankYouMessagePayload, {
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(
+      "Thank you message sent successfully:",
+      JSON.stringify(response.data, null, 2)
+    );
+
+    res.status(200).send("EVENT_RECEIVED");
+  } catch (error) {
+    console.error(
+      "Error processing EasyOrders webhook:",
+      JSON.stringify(
+        error.response ? error.response.data : error.message,
+        null,
+        2
+      )
+    );
+    res.status(500).send("Error processing webhook");
   }
 });
 

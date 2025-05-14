@@ -82,7 +82,7 @@
     <div class="container">
         <h2>تأكيد الطلب</h2>
         <p>لتأكيد الطلب، تواصل معنا على واتساب:</p>
-        <a href="https://wa.me/01022549817?text=أريد%20تأكيد%20الطلب" target="_blank" class="whatsapp-btn">تواصل معنا
+        <a href="https://wa.me/+201022549817?text=أريد%20تأكيد%20الطلب" target="_blank" class="whatsapp-btn">تواصل معنا
             على واتساب</a>
         <div class="code-input">
             <p>أدخل كود التحقق الذي تم إرساله لك:</p>
@@ -174,6 +174,7 @@
                 if (result.success) {
                     messageElement.style.color = 'green';
                     messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
+                    // 
                 } else {
                     messageElement.style.color = 'red';
                     messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
