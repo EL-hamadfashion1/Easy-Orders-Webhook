@@ -337,7 +337,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
       government: government || "غير محدد",
       address: address || "غير محدد",
     });
-    const redirectUrl = `https://35e4-102-190-176-101.ngrok-free.app/track-order?${queryParams.toString()}`;
+    const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
     // الرسالة الرئيسية
     const messageText = `مرحبًا بك ${
