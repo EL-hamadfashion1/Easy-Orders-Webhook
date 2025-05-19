@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 const ACCESS_TOKEN =
-  "EAAa3BG4Yyp4BO5sZAFPAY9G93AByskQj0aAjqdV3opricSZAnKuYBTg9iTCqZCqRNKqKs4IbIhVyzEAgrLZBZCTVBp1zze0GgsXy7KeHOcmDbI13BZBFmkCitUjvE5peHDYz0hwTHvOnma9YQqcUfGp9CFG6lRScdarvVE0RDH3TOJBljMCZAZAozpHBhevGPdZBZCehokt5KYeSmWnP9MlgsXbYxPWrAiIQZDZD"; // ضع التوكن الصحيح هنا
+  "EAAa3BG4Yyp4BO4cRewLPZBwd1lbkRmhcMUNkB9CpjKoNcPGvddaZB8fUj18JuL1nyPtxqjljba3Kxr9qHWNQtHd82KVa1RxtV807vCq55ucuHLeoRIhtKB9ZBo6R5Lk6V2ZAy2u51ALOpyU9mFoORmq2RdIYpZBQYlb2cGmZAig15GVmq8gTUQ5c7mgiXkZCRlKz9hBhORWs6udoSDlaZCJ7W7Yo0vIZD"; // ضع التوكن الصحيح هنا
 const EASY_ORDERS_API_TOKEN = "24133ac9-6de9-4b77-b3c5-cdd2b8d2c139";
 const VERIFY_TOKEN = "easyorders123";
 
@@ -160,40 +160,40 @@ app.post("/webhook/verify", async (req, res) => {
         });
       }
 
-      // here we send a normal message with the link in the message , we have to send with this link order details
-      const thankYouMessagePayload = {
-        messaging_product: "whatsapp",
-        to: phone_number,
-        type: "text",
-        text: {
-          body: "تم التأكد من كود التحقق بنجاح، شكرًا لاستخدامك خدمتنا! ابعت تفاصيل طلبك هنا: https://wa.me/201016908760?text=تفاصيل%20طلبي",
-        },
-      };
+      // // here we send a normal message with the link in the message , we have to send with this link order details
+      // const thankYouMessagePayload = {
+      //   messaging_product: "whatsapp",
+      //   to: phone_number,
+      //   type: "text",
+      //   text: {
+      //     body: "تم التأكد من كود التحقق بنجاح، شكرًا لاستخدامك خدمتنا! ابعت تفاصيل طلبك هنا: https://wa.me/201016908760?text=تفاصيل%20طلبي",
+      //   },
+      // };
 
-      try {
-        const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
-        const response = await axios.post(url, thankYouMessagePayload, {
-          headers: {
-            Authorization: `Bearer ${ACCESS_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-        });
+      // try {
+      //   const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+      //   const response = await axios.post(url, thankYouMessagePayload, {
+      //     headers: {
+      //       Authorization: `Bearer ${ACCESS_TOKEN}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   });
 
-        console.log(
-          "Thank you message with URL button sent successfully:",
-          JSON.stringify(response.data, null, 2)
-        );
-      } catch (apiError) {
-        console.error(
-          "WhatsApp API error:",
-          JSON.stringify(
-            apiError.response ? apiError.response.data : apiError.message,
-            null,
-            2
-          )
-        );
-        throw new Error("Failed to send thank you message");
-      }
+      //   console.log(
+      //     "Thank you message with URL button sent successfully:",
+      //     JSON.stringify(response.data, null, 2)
+      //   );
+      // } catch (apiError) {
+      //   console.error(
+      //     "WhatsApp API error:",
+      //     JSON.stringify(
+      //       apiError.response ? apiError.response.data : apiError.message,
+      //       null,
+      //       2
+      //     )
+      //   );
+      //   throw new Error("Failed to send thank you message");
+      // }
 
       // امسح الكود بعد التحقق الناجح
       delete confirmationCodes[phone_number];
@@ -210,6 +210,298 @@ app.post("/webhook/verify", async (req, res) => {
   } catch (error) {
     console.error("Error verifying code:", error.message);
     res.status(500).json({ success: false, message: "Error verifying code" });
+  }
+});
+
+// Endpoint جديدة لاستقبال حدث order created من EasyOrders
+app.post("/webhook/easy-orders", async (req, res) => {
+  try {
+    const body = req.body;
+    console.log(
+      "Received EasyOrders webhook payload:",
+      JSON.stringify(body, null, 2)
+    );
+
+    // التأكد من وجود الـbody
+    if (!body) {
+      console.error("No body provided in the request");
+      return res
+        .status(400)
+        .json({ success: false, message: "Request body is missing" });
+    }
+
+    const {
+      phone,
+      phone_alt,
+      full_name,
+      address,
+      government,
+      cost,
+      shipping_cost,
+      total_cost,
+      cart_items,
+    } = body;
+
+    // التحقق من الحقول الأساسية
+    const missingFields = [];
+    if (!phone) missingFields.push("phone");
+    if (!cart_items || !cart_items.length) missingFields.push("cart_items");
+
+    if (missingFields.length > 0) {
+      console.error(`Missing required fields: ${missingFields.join(", ")}`);
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(", ")}`,
+      });
+    }
+
+    // التحقق من الحقول الإضافية المستخدمة في الرسالة
+    if (!full_name) console.warn("full_name is missing, using default value");
+    if (!address) console.warn("address is missing, using default value");
+    if (!government) console.warn("government is missing, using default value");
+    if (cost === undefined || cost === null)
+      console.warn("cost is missing, using default value");
+    if (total_cost === undefined || total_cost === null)
+      console.warn("total_cost is missing, using default value");
+
+    // بناء تفاصيل المنتجات
+    let itemsDetails = "";
+    let totalQuantity = 0; // لحساب إجمالي عدد القطع
+    let itemsDetailsForUrl = []; // لتخزين تفاصيل المنتجات للـURL
+    cart_items.forEach((item, index) => {
+      const productName = item?.product?.name || "منتج غير معروف";
+      const quantity = item?.quantity || 1;
+      const price = item?.price || 0;
+
+      // استخراج اللون والمقاس إن وجدوا مع تصحيح البحث
+      const variantProps = item?.variant?.variation_props || [];
+      const color =
+        variantProps.find((p) => p.variation === "اللون")?.variation_prop ||
+        "غير محدد";
+      const size =
+        variantProps.find((p) => p.variation === "المقاس")?.variation_prop ||
+        "غير محدد";
+
+      itemsDetails += `- ${productName},  عدد القطع: ${quantity}\n  اللون: ${color}\n  المقاس: ${size}\n  السعر: ${price} ج.م\n\n`;
+      totalQuantity += quantity; // جمع كمية المنتجات
+
+      itemsDetailsForUrl.push({
+        product: productName,
+        quantity,
+        color,
+        size,
+        price,
+      });
+    });
+
+    // تحديد تكلفة الشحن إذا لم تكن موجودة
+    let effectiveShippingCost;
+    if (shipping_cost !== undefined && shipping_cost !== null) {
+      effectiveShippingCost = shipping_cost;
+    } else if (
+      cost !== undefined &&
+      cost !== null &&
+      total_cost !== undefined &&
+      total_cost !== null
+    ) {
+      effectiveShippingCost = total_cost - cost;
+      console.log(
+        `shipping_cost not provided, calculated as total_cost - cost: ${effectiveShippingCost}`
+      );
+    } else {
+      effectiveShippingCost = 0;
+      console.warn("Unable to determine shipping cost, defaulting to 0");
+    }
+
+    // الشحن والإجمالي
+    const shippingLine =
+      effectiveShippingCost > 0
+        ? `📦 الشحن: ${effectiveShippingCost} ج.م\n`
+        : `📦 الشحن: مجاني\n`;
+
+    const totalLine =
+      total_cost !== undefined && total_cost !== null
+        ? `💰 الإجمالي: ${total_cost} ج.م`
+        : "💰 الإجمالي: غير محدد";
+
+    const queryParams = new URLSearchParams({
+      full_name: full_name || "العميل العزيز",
+      phone: phone,
+      phone_alt: phone_alt || "غير متوفر",
+      items: JSON.stringify(itemsDetailsForUrl), // تفاصيل المنتجات كـJSON
+      shipping: effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني",
+      total:
+        total_cost !== undefined && total_cost !== null
+          ? total_cost
+          : "غير محدد",
+      government: government || "غير محدد",
+      address: address || "غير محدد",
+    });
+    const redirectUrl = `https://35e4-102-190-176-101.ngrok-free.app/track-order?${queryParams.toString()}`;
+
+    // الرسالة الرئيسية
+    const messageText = `مرحبًا بك ${
+      full_name || "العميل العزيز"
+    }\n📱 رقم الهاتف: ${phone}\n📱 رقم إضافي: ${
+      phone_alt || "غير متوفر"
+    }\n\n🧾 تفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\n📍 المحافظة: ${
+      government || "غير محدد"
+    }\n📌 العنوان: ${
+      address || "غير محدد"
+    }\n\n📦 برجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
+
+    // الرسالة النهائية
+    const finalMessage = messageText;
+
+    // التحقق من currentPhoneNumber
+    if (!currentPhoneNumber) {
+      console.error("currentPhoneNumber is not defined");
+      return res.status(500).json({
+        success: false,
+        message:
+          "Failed to send message: currentPhoneNumber is not defined. Please ensure the user has sent a message first.",
+      });
+    }
+
+    // التحقق من phoneNumberId
+    const phoneNumberId = "676367172217822";
+
+    // إعداد رسالة واتساب
+    const thankYouMessagePayload = {
+      messaging_product: "whatsapp",
+      to: currentPhoneNumber,
+      type: "text",
+      text: {
+        body: finalMessage,
+      },
+    };
+
+    const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+    const response = await axios.post(url, thankYouMessagePayload, {
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(
+      "Thank you message sent successfully:",
+      JSON.stringify(response.data, null, 2)
+    );
+    res.status(200).send("EVENT_RECEIVED");
+  } catch (error) {
+    const errorMessage = error.response ? error.response.data : error.message;
+    let detailedMessage = "Error processing EasyOrders webhook";
+
+    if (error.response) {
+      const status = error.response.status;
+      const errorDetails = error.response.data?.error || {};
+
+      if (status === 400) {
+        detailedMessage = `Bad request to WhatsApp API: ${
+          errorDetails.message || "Invalid payload"
+        }`;
+      } else if (status === 401) {
+        detailedMessage = "Authentication failed: Check your ACCESS_TOKEN";
+      } else if (status === 404) {
+        detailedMessage = `Resource not found: Invalid phoneNumberId or endpoint URL`;
+      } else if (status === 429) {
+        detailedMessage =
+          "Rate limit exceeded: Too many requests to WhatsApp API";
+      } else {
+        detailedMessage = `Unexpected error from WhatsApp API: ${
+          errorDetails.message || "Unknown error"
+        }`;
+      }
+    } else if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
+      detailedMessage = "Network error: Could not connect to WhatsApp API";
+    } else {
+      detailedMessage = `Internal server error: ${error.message}`;
+    }
+
+    console.error(
+      "Error processing EasyOrders webhook:",
+      JSON.stringify(errorMessage, null, 2)
+    );
+    console.error("Detailed error:", detailedMessage);
+
+    res.status(500).json({
+      success: false,
+      message: "Error processing webhook",
+      error: detailedMessage,
+    });
+  }
+});
+
+app.get("/track-order", (req, res) => {
+  try {
+    // استخراج الـparameters من الـquery
+    const {
+      full_name,
+      phone,
+      phone_alt,
+      items,
+      shipping,
+      total,
+      government,
+      address,
+    } = req.query;
+
+    // التحقق من وجود الـparameters الأساسية
+    const missingFields = [];
+    if (!full_name) missingFields.push("full_name");
+    if (!phone) missingFields.push("phone");
+    if (!items) missingFields.push("items");
+
+    if (missingFields.length > 0) {
+      console.error(
+        `Missing required query parameters: ${missingFields.join(", ")}`
+      );
+      return res
+        .status(400)
+        .send(`Missing required query parameters: ${missingFields.join(", ")}`);
+    }
+
+    // تحويل items من JSON إلى array
+    let itemsDetails;
+    try {
+      itemsDetails = JSON.parse(items);
+    } catch (error) {
+      console.error("Failed to parse items parameter:", error.message);
+      return res
+        .status(400)
+        .send("Invalid items parameter: must be a valid JSON string");
+    }
+
+    // بناء تفاصيل المنتجات
+    let itemsText = "";
+    itemsDetails.forEach((item) => {
+      itemsText += `- ${item.product},  عدد القطع: ${item.quantity}\n  اللون: ${item.color}\n  المقاس: ${item.size}\n  السعر: ${item.price} ج.م\n\n`;
+    });
+
+    // بناء الرسالة
+    const shippingLine =
+      shipping === "مجاني" ? "📦 الشحن: مجاني" : `📦 الشحن: ${shipping} ج.م`;
+    const totalLine =
+      total !== "غير محدد"
+        ? `💰 الإجمالي: ${total} ج.م`
+        : "💰 الإجمالي: غير محدد";
+
+    const messageText = `مرحبًا بك ${full_name}\n📱 رقم الهاتف: ${phone}\n📱 رقم إضافي: ${phone_alt}\n\n🧾 تفاصيل طلبك:\n${itemsText}${shippingLine}\n${totalLine}\n\n📍 المحافظة: ${government}\n📌 العنوان: ${address}\n\n`;
+
+    // إنشاء الرابط النهائي لـwa.me
+    const whatsappUrl = `https://wa.me/201016908760?text=${encodeURIComponent(
+      messageText
+    )}`;
+
+    // Redirect تلقائي
+    console.log("Redirecting to WhatsApp URL:", whatsappUrl);
+    res.redirect(whatsappUrl);
+  } catch (error) {
+    console.error("Error in /track-order endpoint:", error.message);
+    res
+      .status(500)
+      .send("Error processing track-order redirect: " + error.message);
   }
 });
 
