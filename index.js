@@ -14,7 +14,7 @@ const VERIFY_TOKEN = "easyorders123";
 
 const confirmationCodes = {};
 const phoneNumberIds = {};
-let currentPhoneNumber = ""; // متغير لتخزين رقم الهاتف الحالي
+let currentPhoneNumber = "";
 
 app.get("/webhook/meta", (req, res) => {
   const mode = req.query["hub.mode"];
