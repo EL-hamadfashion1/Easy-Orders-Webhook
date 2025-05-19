@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>تأكيد الطلب</title>
-        <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الطلب</title>
+    <style>
         body {
             font-family: Arial, sans-serif;
             direction: rtl;
@@ -70,17 +70,18 @@
         button:hover:not(:disabled) {
             background-color: #0056b3;
         }
-    .form_checkout_btn,
-    .checkout_buy_now {
-        display: none !important;
-    }
+
+        .form_checkout_btn,
+        .checkout_buy_now {
+            display: none !important;
+        }
 
         .message {
             margin-top: 10px;
             color: #333;
         }
     </style>
-    </head>
+</head>
 
 <body>
     <div class="container">
@@ -98,32 +99,12 @@
         </div>
     </div>
     <script>
-        // دالة مساعدة لعمل fetch مع الـheader بتاع ngrok
-        async function customFetch(url, options = {}) {
-            const defaultHeaders = {
-                'Content-Type': 'application/json',
-                'ngrok-skip-browser-warning': '69420' // الـheader عشان نمرّق تحذير ngrok
-            };
-
-            options.headers = { ...defaultHeaders, ...options.headers };
-
-            try {
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('Fetch error:', error.message);
-                throw error;
-            }
-        }
 
         // دالة لجلب رقم الهاتف الحالي من السيرفر
         async function getCurrentPhoneNumber() {
             try {
                 console.log("from get curr");
-                const data = await customFetch('https://35e4-102-190-176-101.ngrok-free.app/current-phone', {
+                const data = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
                     mode: 'cors'
                 });
                 console.log("from get curr res", data);
@@ -168,7 +149,7 @@
             confirmBtn.textContent = 'جاري التحقق...';
 
             try {
-                const result = await customFetch('https://35e4-102-190-176-101.ngrok-free.app/webhook/verify', {
+                const result = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
                     method: 'POST',
                     mode: 'cors',
                     body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
@@ -192,6 +173,6 @@
             }
         }
     </script>
-    </body>
+</body>
 
 </html>
