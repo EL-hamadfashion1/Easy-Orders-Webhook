@@ -16,6 +16,18 @@ app.use(
     cookie: { secure: false },
   })
 );
+app.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://el-hamadfashion.myeasyorders.com"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 const ACCESS_TOKEN =
   "EAAa3BG4Yyp4BO6boZBAXQoLIvHGqkAbTn84ID6PjYXMNJvFNP9zCPhRjgxVwpmIChvilAKj0w3LfUTYw0OFZBpo3tOCsTFWtWXbhahREP95i6Tn92ZBO7ZB1G4Gpk6PcBH3O84X8kPa4evXR1pNPgtbHLtRccGpKVi8SR3Y4g7ZA7H3GhgCgjIYdB";

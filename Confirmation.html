@@ -93,25 +93,24 @@
             <!-- Dialog -->
             <button onclick="openDialog()">أدخل كود التحقق</button>
 
-            <div id="codeDialog"
-                style="display:none; position:fixed; top:0; right:0; bottom:0; left:0; background-color:rgba(0,0,0,0.5);">
-                <div
-                    style="background:#fff; padding:20px; margin:100px auto; width:90%; max-width:400px; border-radius:10px; position:relative;">
-                    <span
-                        style="position:absolute; top:10px; left:0; cursor:pointer;"
-                        onclick="closeDialog()">✖</span>
-                    <h3>أدخل كود التحقق</h3>
-                    <input type="number" id="confirmationCode"
-                        placeholder="أدخل الكود هنا"
-                        style="width:100%; padding:10px; margin-bottom:10px;">
-                    <input type="hidden" id="phoneNumber">
-                    <button onclick="verifyCode()" id="Confirmbtn">تأكيد
-                        الكود</button>
-                    <p id="message" class="message"></p>
-                </div>
+        <div id="codeDialog"
+            style="display:none; position:fixed; top:0; right:0; bottom:0; left:0; background-color:rgba(0,0,0,0.5);">
+            <div
+                style="background:#fff; padding:20px; margin:100px auto; width:90%; max-width:400px; border-radius:10px; position:relative;">
+                <span style="position:absolute; top:10px; left:0; cursor:pointer;" onclick="closeDialog()">✖</span>
+                <h3>أدخل كود التحقق</h3>
+                <input type="number" id="confirmationCode" placeholder="أدخل الكود هنا"
+                    style="width:100%; padding:10px; margin-bottom:10px;">
+                <input type="hidden" id="phoneNumber">
+                <button onclick="verifyCode()" id="Confirmbtn">تأكيد
+                    الكود</button>
+                <p id="message" class="message"></p>
             </div>
         </div>
-        <script>
+    </div>
+    <script>
+        const origin = window.location;
+        console.log(fullUrl);
         function openDialog() {
             document.getElementById("codeDialog").style.display = "block";
         }
@@ -122,13 +121,13 @@
         async function getCurrentPhoneNumber() {
             try {
                 console.log("from get curr");
+
                 const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
-                    mode: 'cors',
-                    method: 'GET',
-                    credentials: 'include',
+                    credentials: "include",
+                    mode: "cors",
+                    'X-Origin': window.location.origin
                 });
                 const data = await response.json();
-
                 console.log("from get curr res", data);
                 if (data.phone_number) {
                     document.getElementById('phoneNumber').value = data.phone_number;
@@ -172,11 +171,12 @@
             try {
                 const res = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
                     method: 'POST',
-                    mode: 'cors',
-                    credentials: 'include',
+                    mode: "cors",
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Origin': window.location.origin
                     },
+                    credentials: "include",
                     body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
                 });
                 const result = await res.json();
