@@ -1,76 +1,74 @@
 <!DOCTYPE html>
 <html lang="ar">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تأكيد الطلب</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            direction: rtl;
-            text-align: center;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
+  <meta charset="UTF-8">
+  <title>تأكيد الطلب</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: center;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+    .confirm-container {
+      max-width: 600px;
+      margin: 20px auto 0;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: none; /* مخفي في البداية */
+    }
 
-        h2 {
-            color: #333;
-        }
+    .confirm-title {
+      color: #333;
+    }
 
-        .whatsapp-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #25D366;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
+    .confirm-whatsapp-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #25D366;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
 
-        .whatsapp-btn:hover {
-            background-color: #1ebe57;
-        }
+    .confirm-whatsapp-btn:hover {
+      background-color: #1ebe57;
+    }
 
-        .code-input {
-            margin-top: 20px;
-        }
+    .confirm-code-input {
+      margin-top: 20px;
+    }
 
-        input[type="text"] {
-            padding: 10px;
-            width: 200px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    .confirm-code-input input[type="text"] {
+      padding: 10px;
+      width: 200px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .confirm-button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
 
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
+    .confirm-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
 
-        button:hover:not(:disabled) {
-            background-color: #0056b3;
-        }
-
+    .confirm-button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
         .form_checkout_btn,
         .checkout_buy_now {
             display: none !important;
@@ -80,99 +78,54 @@
             margin-top: 10px;
             color: #333;
         }
-    </style>
+  </style>
 </head>
-
 <body>
-    <div class="container">
-        <h2>تأكيد الطلب</h2>
-        <p>لتأكيد الطلب، تواصل معنا على واتساب:</p>
-        <a href="https://wa.me/+201022549817?text=أريد%20تأكيد%20الطلب" target="_blank" class="whatsapp-btn">تواصل معنا
-            على واتساب</a>
-        <div class="code-input">
-            <p>أدخل كود التحقق الذي تم إرساله لك:</p>
-            <input type="text" id="confirmationCode" placeholder="أدخل الكود هنا">
-            <input type="hidden" id="phoneNumber">
-            <br>
-            <button onclick="verifyCode()" id="Confirmbtn">تأكيد الكود</button>
-            <p id="message" class="message"></p>
-        </div>
+<div class="card-confirm">
+
+    <!-- زر الشراء -->
+    <button onclick="toggleConfirmContainer()" class="confirm-button">اضغط هنا للشراء</button>
+  
+    <!-- الكونتينر -->
+    <div class="confirm-container" id="confirmContainer">
+      <h2 class="confirm-title">تأكيد الطلب</h2>
+      <p>لتأكيد الطلب، تواصل معنا على واتساب:</p>
+      <a href="https://wa.me/+201022549817?text=أريد%20تأكيد%20الطلب"
+         target="_blank"
+         class="confirm-whatsapp-btn">
+        تواصل معنا على واتساب
+      </a>
+      <div class="confirm-code-input">
+        <p>أدخل كود التحقق الذي تم إرساله لك:</p>
+        <input type="text" id="confirmationCode" placeholder="أدخل الكود هنا">
+        <input type="hidden" id="phoneNumber">
+        <br>
+        <button onclick="verifyCode()" id="confirmBtn" class="confirm-button">تأكيد الكود</button>
+        <p id="message" class="confirm-message"></p>
+      </div>
     </div>
-    <script>
+</div>
 
-        // دالة لجلب رقم الهاتف الحالي من السيرفر
-        async function getCurrentPhoneNumber() {
-            try {
-                console.log("from get curr");
-                const data = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
-                    mode: 'cors'
-                });
-                console.log("from get curr res", data);
+  <script>
+    function toggleConfirmContainer() {
+      const container = document.getElementById('confirmContainer');
+      container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    }
 
-                if (data.phone_number) {
-                    document.getElementById('phoneNumber').value = data.phone_number;
-                    return data;
-                }
-                return {};
-            } catch (error) {
-                console.error('Error fetching phone number:', error.message);
-                document.getElementById('message').textContent = 'حدث خطأ في جلب رقم الهاتف';
-                document.getElementById('message').style.color = 'red';
-                throw error;
-            }
-        }
+    function verifyCode() {
+      const code = document.getElementById('confirmationCode').value;
+      const message = document.getElementById('message');
 
-        // دالة التحقق من الكود
-        async function verifyCode() {
-            const phoneData = await getCurrentPhoneNumber();
-            console.log(phoneData);
-            const code = document.getElementById('confirmationCode').value;
-            const phoneNumber = document.getElementById('phoneNumber').value; // استخدمنا الـinput بدل القيمة الثابتة
-            const messageElement = document.getElementById('message');
-            const confirmBtn = document.getElementById('Confirmbtn');
+      // تحقق تجريبي
+      if (code === '1234') {
+        message.textContent = 'تم التأكيد بنجاح!';
+        message.style.color = 'green';
+      } else {
+        message.textContent = 'الكود غير صحيح. حاول مرة أخرى.';
+        message.style.color = 'red';
+      }
+    }
+  </script>
 
-            console.log("=======================> Phone Number: " + phoneNumber);
-
-            if (!phoneNumber) {
-                messageElement.textContent = 'رقم التليفون غير متوفر';
-                messageElement.style.color = 'red';
-                return;
-            }
-
-            if (!code) {
-                messageElement.textContent = 'يرجى إدخال كود التحقق';
-                messageElement.style.color = 'red';
-                return;
-            }
-
-            confirmBtn.disabled = true;
-            confirmBtn.textContent = 'جاري التحقق...';
-
-            try {
-                const result = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
-                    method: 'POST',
-                    mode: 'cors',
-                    body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
-                });
-
-                if (result.success) {
-                    messageElement.style.color = 'green';
-                    messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
-                    // 
-                } else {
-                    messageElement.style.color = 'red';
-                    messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
-                }
-            } catch (error) {
-                messageElement.style.color = 'red';
-                messageElement.textContent = 'حدث خطأ أثناء التحقق، حاول مرة أخرى.';
-                console.error('Error:', error);
-            } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.textContent = 'تأكيد الكود';
-            }
-        }
-    </script>
 </body>
-
 </html>
