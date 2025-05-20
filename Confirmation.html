@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>تأكيد الطلب</title>
-        <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الطلب</title>
+    <style>
         body {
             font-family: Arial, sans-serif;
             direction: rtl;
@@ -81,52 +81,49 @@
             color: #333;
         }
     </style>
-    </head>
+</head>
 
-    <body>
-        <div class="container">
-            <h2>تأكيد الطلب</h2>
-            <p>لتأكيد الطلب، تواصل معنا على واتساب:</p>
-            <a href="https://wa.me/+201022549817?text=أريد%20تأكيد%20الطلب"
-                target="_blank" class="whatsapp-btn">تواصل معنا
-                على واتساب</a>
-            <!-- Dialog -->
-            <button onclick="openDialog()">أدخل كود التحقق</button>
+<body>
+    <div class="container">
+        <h2>تأكيد الطلب</h2>
+        <p>لتأكيد الطلب، تواصل معنا على واتساب:</p>
+        <a href="https://wa.me/+201022549817?text=أريد%20تأكيد%20الطلب" target="_blank" class="whatsapp-btn">تواصل معنا
+            على واتساب</a>
+        <!-- Dialog -->
+        <button onclick="openDialog()">أدخل كود التحقق</button>
 
-            <div id="codeDialog"
-                style="display:none; position:fixed; top:0; right:0; bottom:0; left:0; background-color:rgba(0,0,0,0.5);">
-                <div
-                    style="background:#fff; padding:20px; margin:100px auto; width:90%; max-width:400px; border-radius:10px; position:relative;">
-                    <span
-                        style="position:absolute; top:10px; left:0; cursor:pointer;"
-                        onclick="closeDialog()">✖</span>
-                    <h3>أدخل كود التحقق</h3>
-                    <input type="number" id="confirmationCode"
-                        placeholder="أدخل الكود هنا"
-                        style="width:100%; padding:10px; margin-bottom:10px;">
-                    <input type="hidden" id="phoneNumber">
-                    <button onclick="verifyCode()" id="Confirmbtn">تأكيد
-                        الكود</button>
-                    <p id="message" class="message"></p>
-                </div>
+        <div id="codeDialog"
+            style="display:none; position:fixed; top:0; right:0; bottom:0; left:0; background-color:rgba(0,0,0,0.5);">
+            <div
+                style="background:#fff; padding:20px; margin:100px auto; width:90%; max-width:400px; border-radius:10px; position:relative;">
+                <span style="position:absolute; top:10px; left:0; cursor:pointer;" onclick="closeDialog()">✖</span>
+                <h3>أدخل كود التحقق</h3>
+                <input type="number" id="confirmationCode" placeholder="أدخل الكود هنا"
+                    style="width:100%; padding:10px; margin-bottom:10px;">
+                <input type="hidden" id="phoneNumber">
+                <button onclick="verifyCode()" id="Confirmbtn">تأكيد
+                    الكود</button>
+                <p id="message" class="message"></p>
             </div>
         </div>
-        <script>
+    </div>
+    <script>
         function openDialog() {
             document.getElementById("codeDialog").style.display = "block";
         }
         function closeDialog() {
             document.getElementById("codeDialog").style.display = "none";
         }
+
         async function getCurrentPhoneNumber() {
             try {
                 console.log("from get curr");
 
                 console.log("from get curr res", data);
-            const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
-                mode: 'cors'
-            });
-            const data = await response.json();
+                const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
+                    mode: 'cors'
+                });
+                const data = await response.json();
                 if (data.phone_number) {
                     document.getElementById('phoneNumber').value = data.phone_number;
                     return data;
@@ -167,11 +164,15 @@
             confirmBtn.textContent = 'جاري التحقق...';
 
             try {
-                const result = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
+                const res = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
                     method: 'POST',
                     mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
                 });
+                const result = await res.json();
 
                 if (result.success) {
                     messageElement.style.color = 'green';
@@ -202,6 +203,6 @@
             }
         }
     </script>
-    </body>
+</body>
 
 </html>
