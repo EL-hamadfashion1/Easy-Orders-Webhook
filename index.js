@@ -283,7 +283,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
         variantProps.find((p) => p.variation === "المقاس")?.variation_prop ||
         "غير محدد";
 
-      itemsDetails += `- ${productName},  عدد القطع: ${quantity}\n  اللون: ${color}\n  المقاس: ${size}\n  السعر: ${price} ج.م\n\n`;
+      itemsDetails += `- ${productName},  عدد القطع: ${quantity}\n  اللون: ${color}\n  المقاس: ${size}\n للقطعة الواحدة السعر: ${price} ج.م\n\n`;
       totalQuantity += quantity; // جمع كمية المنتجات
 
       itemsDetailsForUrl.push({
