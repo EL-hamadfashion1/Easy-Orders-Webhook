@@ -123,10 +123,10 @@
                 console.log("from get curr");
 
                 console.log("from get curr res", data);
-const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
-    mode: 'cors'
-});
-const data = await response.json();
+            const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
+                mode: 'cors'
+            });
+            const data = await response.json();
                 if (data.phone_number) {
                     document.getElementById('phoneNumber').value = data.phone_number;
                     return data;
@@ -177,6 +177,17 @@ const data = await response.json();
                     messageElement.style.color = 'green';
                     messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
                     // 
+                                        // 
+                      const confirmCard = document.querySelector('.card-confirm');
+    if (confirmCard) {
+        confirmCard.style.display = 'none';
+    }
+
+    // إظهار العناصر بعد نجاح التأكيد
+    const checkoutButtons = document.querySelectorAll('.form_checkout_btn, .checkout_buy_now');
+    checkoutButtons.forEach(btn => {
+        btn.style.display = 'inline-block'; // أو 'block' حسب العنصر
+    });
                 } else {
                     messageElement.style.color = 'red';
                     messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
