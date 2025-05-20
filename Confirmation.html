@@ -104,9 +104,10 @@
         async function getCurrentPhoneNumber() {
             try {
                 console.log("from get curr");
-                const data = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
+                const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
                     mode: 'cors'
                 });
+                const data = await response.json();
                 console.log("from get curr res", data);
 
                 if (data.phone_number) {
