@@ -1,33 +1,11 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
-const port = 3000;
-const session = require("express-session");
-
 const app = express();
+const port = 3000;
 
 app.use(express.json());
 app.use(cors());
-app.use(
-  session({
-    secret: "ahemedelghrabawy1@7@2004@Eslame#ksfljlskdfjaAAHAHAHA",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false },
-  })
-);
-app.use((req, res, next) => {
-  res.header(
-    "Access-Control-Allow-Origin",
-    "https://el-hamadfashion.myeasyorders.com"
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
 
 const ACCESS_TOKEN =
   "EAAa3BG4Yyp4BO6boZBAXQoLIvHGqkAbTn84ID6PjYXMNJvFNP9zCPhRjgxVwpmIChvilAKj0w3LfUTYw0OFZBpo3tOCsTFWtWXbhahREP95i6Tn92ZBO7ZB1G4Gpk6PcBH3O84X8kPa4evXR1pNPgtbHLtRccGpKVi8SR3Y4g7ZA7H3GhgCgjIYdB";
@@ -36,6 +14,7 @@ const VERIFY_TOKEN = "easyorders123";
 
 const confirmationCodes = {};
 const phoneNumberIds = {};
+let currentPhoneNumber = "";
 
 app.get("/webhook/meta", (req, res) => {
   const mode = req.query["hub.mode"];
@@ -52,7 +31,7 @@ app.get("/webhook/meta", (req, res) => {
 });
 
 app.get("/current-phone", (req, res) => {
-  res.status(200).json({ phone_number: req.session.phoneNumber });
+  res.status(200).json({ phone_number: currentPhoneNumber });
 });
 
 app.post("/webhook/meta", async (req, res) => {
@@ -80,29 +59,18 @@ app.post("/webhook/meta", async (req, res) => {
         console.log("=================>" + phoneNumberId);
         console.log("-> Phone Number pure : " + phoneNumber);
 
-        req.session.phoneNumber = phoneNumber;
-
         phoneNumberIds[phoneNumber] = phoneNumberId;
 
-        console.log(
-          `Message received from ${req.session.phoneNumber}: ${messageText}`
-        );
+        console.log(`Message received from ${phoneNumber}: ${messageText}`);
 
         if (messageText === "أريد تأكيد الطلب") {
           // تحديث رقم الهاتف الحالي
-          console.log(
-            "=><><From Session Number><><========= " + req.session.phoneNumber
-          );
+          currentPhoneNumber = phoneNumber;
+          console.log("=><><><><========= " + currentPhoneNumber);
           const confirmationCode = Math.floor(
             100000 + Math.random() * 900000
           ).toString();
           confirmationCodes[phoneNumber] = confirmationCode;
-          req.session.confirmationCode = confirmationCode;
-
-          console.log(
-            `confirm code from session : ${(req.session.confirmationCode =
-              confirmationCode)}`
-          );
 
           const messagePayload = {
             messaging_product: "whatsapp",
@@ -173,37 +141,64 @@ app.post("/webhook/verify", async (req, res) => {
     console.log("--------> " + phone_number);
     console.log("-----" + confirmationCodes[phone_number]);
 
-    // if (!confirmationCodes[phone_number]) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "No confirmation code found for this phone number",
-    //   });
-    // }
-
-    if (
-      !req.session.confirmationCode ||
-      req.session.phoneNumber !== phone_number
-    ) {
+    if (!confirmationCodes[phone_number]) {
       return res.status(400).json({
         success: false,
         message: "No confirmation code found for this phone number",
       });
     }
 
-    // if (confirmationCodes[phone_number] === entered_code) {
-    //   console.log("Code verified for", phone_number);
-    //   // جلب phoneNumberId عشان نستخدمه في إرسال الرسالة
-    //   const phoneNumberId = phoneNumberIds[phone_number];
-    //   if (!phoneNumberId) {
-    //     console.error("No phone_number_id found for", phone_number);
-    //     return res.status(500).json({
-    //       success: false,
-    //       message: "Internal error: phone_number_id not found",
-    //     });
-    //   }
-
-    if (req.session.confirmationCode === entered_code) {
+    if (confirmationCodes[phone_number] === entered_code) {
       console.log("Code verified for", phone_number);
+      // جلب phoneNumberId عشان نستخدمه في إرسال الرسالة
+      const phoneNumberId = phoneNumberIds[phone_number];
+      if (!phoneNumberId) {
+        console.error("No phone_number_id found for", phone_number);
+        return res.status(500).json({
+          success: false,
+          message: "Internal error: phone_number_id not found",
+        });
+      }
+
+      // // here we send a normal message with the link in the message , we have to send with this link order details
+      // const thankYouMessagePayload = {
+      //   messaging_product: "whatsapp",
+      //   to: phone_number,
+      //   type: "text",
+      //   text: {
+      //     body: "تم التأكد من كود التحقق بنجاح، شكرًا لاستخدامك خدمتنا! ابعت تفاصيل طلبك هنا: https://wa.me/201016908760?text=تفاصيل%20طلبي",
+      //   },
+      // };
+
+      // try {
+      //   const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+      //   const response = await axios.post(url, thankYouMessagePayload, {
+      //     headers: {
+      //       Authorization: `Bearer ${ACCESS_TOKEN}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   });
+
+      //   console.log(
+      //     "Thank you message with URL button sent successfully:",
+      //     JSON.stringify(response.data, null, 2)
+      //   );
+      // } catch (apiError) {
+      //   console.error(
+      //     "WhatsApp API error:",
+      //     JSON.stringify(
+      //       apiError.response ? apiError.response.data : apiError.message,
+      //       null,
+      //       2
+      //     )
+      //   );
+      //   throw new Error("Failed to send thank you message");
+      // }
+
+      // امسح الكود بعد التحقق الناجح
+      delete confirmationCodes[phone_number];
+      delete phoneNumberIds[phone_number];
+
       res
         .status(200)
         .json({ success: true, message: "Code verified successfully" });
@@ -212,49 +207,6 @@ app.post("/webhook/verify", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid confirmation code" });
     }
-
-    // // here we send a normal message with the link in the message , we have to send with this link order details
-    // const thankYouMessagePayload = {
-    //   messaging_product: "whatsapp",
-    //   to: phone_number,
-    //   type: "text",
-    //   text: {
-    //     body: "تم التأكد من كود التحقق بنجاح، شكرًا لاستخدامك خدمتنا! ابعت تفاصيل طلبك هنا: https://wa.me/201016908760?text=تفاصيل%20طلبي",
-    //   },
-    // };
-
-    // try {
-    //   const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
-    //   const response = await axios.post(url, thankYouMessagePayload, {
-    //     headers: {
-    //       Authorization: `Bearer ${ACCESS_TOKEN}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
-
-    //   console.log(
-    //     "Thank you message with URL button sent successfully:",
-    //     JSON.stringify(response.data, null, 2)
-    //   );
-    // } catch (apiError) {
-    //   console.error(
-    //     "WhatsApp API error:",
-    //     JSON.stringify(
-    //       apiError.response ? apiError.response.data : apiError.message,
-    //       null,
-    //       2
-    //     )
-    //   );
-    //   throw new Error("Failed to send thank you message");
-    // }
-
-    // امسح الكود بعد التحقق الناجح
-    delete confirmationCodes[phone_number];
-    delete phoneNumberIds[phone_number];
-
-    res
-      .status(200)
-      .json({ success: true, message: "Code verified successfully" });
   } catch (error) {
     console.error("Error verifying code:", error.message);
     res.status(500).json({ success: false, message: "Error verifying code" });
@@ -400,15 +352,14 @@ app.post("/webhook/easy-orders", async (req, res) => {
 
     // الرسالة النهائية
     const finalMessage = messageText;
-    const phoneNumber = req.session.phoneNumber;
 
     // التحقق من currentPhoneNumber
-    if (!phoneNumber) {
-      console.error("Session data missing");
+    if (!currentPhoneNumber) {
+      console.error("currentPhoneNumber is not defined");
       return res.status(500).json({
         success: false,
         message:
-          "Failed to send message: Session data missing. Please start the process again.",
+          "Failed to send message: currentPhoneNumber is not defined. Please ensure the user has sent a message first.",
       });
     }
 
@@ -418,7 +369,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
     // إعداد رسالة واتساب
     const thankYouMessagePayload = {
       messaging_product: "whatsapp",
-      to: phoneNumber,
+      to: phone,
       type: "text",
       text: {
         body: finalMessage,
@@ -437,16 +388,6 @@ app.post("/webhook/easy-orders", async (req, res) => {
       "Thank you message sent successfully:",
       JSON.stringify(response.data, null, 2)
     );
-    // امسح الـsession بعد ما تبعت تفاصيل الطلب بنجاح
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Error destroying session:", err);
-      } else {
-        console.log(
-          "Session destroyed successfully after sending order details"
-        );
-      }
-    });
     res.status(200).send("EVENT_RECEIVED");
   } catch (error) {
     const errorMessage = error.response ? error.response.data : error.message;

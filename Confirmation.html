@@ -96,7 +96,7 @@
             style="display:none; position:fixed; top:0; right:0; bottom:0; left:0; background-color:rgba(0,0,0,0.5);">
             <div
                 style="background:#fff; padding:20px; margin:100px auto; width:90%; max-width:400px; border-radius:10px; position:relative;">
-                <span style="position:absolute; top:10px; left:0; cursor:pointer;" onclick="closeDialog()">✖</span>
+                <span style="position:absolute; top:10px; left:0; cursor:pointer;" onclick="closeDialog()">✖️</span>
                 <h3>أدخل كود التحقق</h3>
                 <input type="number" id="confirmationCode" placeholder="أدخل الكود هنا"
                     style="width:100%; padding:10px; margin-bottom:10px;">
@@ -120,11 +120,8 @@
         async function getCurrentPhoneNumber() {
             try {
                 console.log("from get curr");
-
                 const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
-                    credentials: "include",
                     mode: "cors",
-                    'X-Origin': window.location.origin
                 });
                 const data = await response.json();
                 console.log("from get curr res", data);
@@ -173,9 +170,7 @@
                     mode: "cors",
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Origin': window.location.origin
                     },
-                    credentials: "include",
                     body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
                 });
                 const result = await res.json();
@@ -183,7 +178,17 @@
                 if (result.success) {
                     messageElement.style.color = 'green';
                     messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
-                    // 
+                    
+                    const confirmCard = document.querySelector('.card-confirm');
+                    if (confirmCard) {
+                        confirmCard.style.display = 'none';
+                    }
+
+                    // إظهار العناصر بعد نجاح التأكيد
+                    const checkoutButtons = document.querySelectorAll('.form_checkout_btn, .checkout_buy_now');
+                    checkoutButtons.forEach(btn => {
+                        btn.style.display = 'inline-block'; // أو 'block' حسب العنصر
+                    });
                 } else {
                     messageElement.style.color = 'red';
                     messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
