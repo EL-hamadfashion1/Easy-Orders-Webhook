@@ -240,6 +240,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
       shipping_cost,
       total_cost,
       cart_items,
+      country,
     } = body;
 
     // التحقق من الحقول الأساسية
@@ -336,6 +337,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
           : "غير محدد",
       government: government || "غير محدد",
       address: address || "غير محدد",
+      country: country || "غير محدد",
     });
     const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
@@ -346,9 +348,9 @@ app.post("/webhook/easy-orders", async (req, res) => {
       phone_alt || "غير متوفر"
     }\n\n🧾 تفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\n📍 المحافظة: ${
       government || "غير محدد"
-    }\n📌 العنوان: ${
+    }\n📌 المنطقه: ${
       address || "غير محدد"
-    }\n\n📦 برجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
+    }\n📌 العنوان بالتفصيل:${country}\n\n📦 برجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
 
     // الرسالة النهائية
     const finalMessage = messageText;
@@ -445,6 +447,7 @@ app.get("/track-order", (req, res) => {
       total,
       government,
       address,
+      country,
     } = req.query;
 
     // التحقق من وجود الـparameters الأساسية
@@ -476,7 +479,7 @@ app.get("/track-order", (req, res) => {
     // بناء تفاصيل المنتجات
     let itemsText = "";
     itemsDetails.forEach((item) => {
-      itemsText += `- ${item.product},  عدد القطع: ${item.quantity}\n  اللون: ${item.color}\n  المقاس: ${item.size}\n  السعر: ${item.price} ج.م\n\n`;
+      itemsText += `- ${item.product},  عدد القطع: ${item.quantity}\n  اللون: ${item.color}\n  المقاس: ${item.size}\n للقطعة الواحدة السعر: ${item.price} ج.م\n\n`;
     });
 
     // بناء الرسالة
@@ -487,7 +490,7 @@ app.get("/track-order", (req, res) => {
         ? `💰 الإجمالي: ${total} ج.م`
         : "💰 الإجمالي: غير محدد";
 
-    const messageText = `مرحبًا بك ${full_name}\n📱 رقم الهاتف: ${phone}\n📱 رقم إضافي: ${phone_alt}\n\n🧾 تفاصيل طلبك:\n${itemsText}${shippingLine}\n${totalLine}\n\n📍 المحافظة: ${government}\n📌 العنوان: ${address}\n\n`;
+    const messageText = `مرحبًا بك ${full_name}\n📱 رقم الهاتف: ${phone}\n📱 رقم إضافي: ${phone_alt}\n\n🧾 تفاصيل طلبك:\n${itemsText}${shippingLine}\n${totalLine}\n\n📍 المحافظة: ${government}\n📌 العنوان: ${address}\n📌 العنوان بالتفصيل: ${country}\n\n`;
 
     // إنشاء الرابط النهائي لـwa.me
     const whatsappUrl = `https://wa.me/201016908760?text=${encodeURIComponent(
