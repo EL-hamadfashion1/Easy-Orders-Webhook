@@ -68,7 +68,7 @@ app.post("/webhook/meta", async (req, res) => {
           currentPhoneNumber = phoneNumber;
           console.log("=><><><><========= " + currentPhoneNumber);
           const confirmationCode = Math.floor(
-            100000 + Math.random() * 900000
+            1000 + Math.random() * 9000
           ).toString();
           confirmationCodes[phoneNumber] = confirmationCode;
 
@@ -342,15 +342,11 @@ app.post("/webhook/easy-orders", async (req, res) => {
     const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
     // الرسالة الرئيسية
-    const messageText = `مرحبًا بك ${
-      full_name || "العميل العزيز"
-    }\n📱 رقم الهاتف: ${phone}\n📱 رقم إضافي: ${
-      phone_alt || "غير متوفر"
-    }\n\n🧾 تفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\n📍 المحافظة: ${
-      government || "غير محدد"
-    }\n📌 المنطقه: ${
-      country || "غير محدد"
-    }\n📌 العنوان بالتفصيل:${address}\n\n📦 برجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
+    const messageText = `مرحبًا بك ${full_name || "العميل العزيز"
+      }\n📱 رقم الهاتف: ${phone}\n📱 رقم إضافي: ${phone_alt || "غير متوفر"
+      }\n\n🧾 تفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\n📍 المحافظة: ${government || "غير محدد"
+      }\n📌 المنطقه: ${country || "غير محدد"
+      }\n📌 العنوان بالتفصيل:${address}\n\n📦 برجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
 
     // الرسالة النهائية
     const finalMessage = messageText;
@@ -400,9 +396,8 @@ app.post("/webhook/easy-orders", async (req, res) => {
       const errorDetails = error.response.data?.error || {};
 
       if (status === 400) {
-        detailedMessage = `Bad request to WhatsApp API: ${
-          errorDetails.message || "Invalid payload"
-        }`;
+        detailedMessage = `Bad request to WhatsApp API: ${errorDetails.message || "Invalid payload"
+          }`;
       } else if (status === 401) {
         detailedMessage = "Authentication failed: Check your ACCESS_TOKEN";
       } else if (status === 404) {
@@ -411,9 +406,8 @@ app.post("/webhook/easy-orders", async (req, res) => {
         detailedMessage =
           "Rate limit exceeded: Too many requests to WhatsApp API";
       } else {
-        detailedMessage = `Unexpected error from WhatsApp API: ${
-          errorDetails.message || "Unknown error"
-        }`;
+        detailedMessage = `Unexpected error from WhatsApp API: ${errorDetails.message || "Unknown error"
+          }`;
       }
     } else if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
       detailedMessage = "Network error: Could not connect to WhatsApp API";
