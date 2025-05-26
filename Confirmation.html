@@ -1,146 +1,138 @@
 <!DOCTYPE html>
 <html lang="ar">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>تأكيد الطلب</title>
-        <style>
-    .whatsapp-icon {
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
-    }
-.confirm-container {
-  max-width: 600px;
-  margin: 20px auto 0;
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  display: none;
-  text-align: center;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الطلب</title>
+    <style>
+        .whatsapp-icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
 
-.confirm-whatsapp-btn,
-.confirm-code-input input[type="text"],
-.confirm-button,
-#Confirmbtn,
-#retryWhatsApp {
-  display: block;
-  margin: 10px auto;
-}
+        .confirm-container {
+            max-width: 600px;
+            margin: 20px auto 0;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            text-align: center;
+        }
 
-    .confirm-title {
-      color: #333;
-    }
+        .confirm-whatsapp-btn,
+        .confirm-code-input input[type="text"],
+        .confirm-button,
+        #Confirmbtn,
+        #retryWhatsApp {
+            display: block;
+            margin: 10px auto;
+        }
 
-    .confirm-whatsapp-btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #25D366;
-      color: white;
-      border-radius: 5px;
-      margin: 10px 0;
-      width: 80%;
-    }
+        .confirm-title {
+            color: #333;
+        }
 
-    .confirm-whatsapp-btn:hover {
-      background-color: #1ebe57;
-    }
+        .confirm-whatsapp-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #25D366;
+            color: white;
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 80%;
+        }
 
-    .confirm-code-input {
-      margin-top: 20px;
-    }
+        .confirm-whatsapp-btn:hover {
+            background-color: #1ebe57;
+        }
 
-    .confirm-code-input input[type="text"] {
-      padding: 10px;
-      width: 200px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+        .confirm-code-input {
+            margin-top: 20px;
+        }
 
-    .confirm-button {
-      padding: 10px 20px;
-      background-color: #9013fe;
-      color: white;
-      width : 100%;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        .confirm-code-input input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-    .confirm-button:disabled {
-      background-color: #9013fe;
-      cursor: not-allowed;
-    }
+        .confirm-button {
+            padding: 10px 20px;
+            background-color: #9013fe;
+            color: white;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-    .confirm-button:hover:not(:disabled) {
-      background-color: #9013fe;
-    }
+        .confirm-button:disabled {
+            background-color: #9013fe;
+            cursor: not-allowed;
+        }
+
+        .confirm-button:hover:not(:disabled) {
+            background-color: #9013fe;
+        }
 
         .form_checkout_btn,
         .checkout_buy_now {
-            display: none ;
+            display: none;
         }
 
-    .confirm-message {
-      margin-top: 10px;
-      color: #333;
-    }
-        </style>
-    </head>
+        .confirm-message {
+            margin-top: 10px;
+            color: #333;
+        }
+    </style>
+</head>
 
-    <body>
-        <div class="card-confirm">
-            <!-- زر الشراء -->
-            <button onclick="toggleConfirmContainer()"
-                class="confirm-button">اضغط هنا للشراء</button>
+<body>
+    <div class="card-confirm">
+        <!-- زر الشراء -->
+        <button onclick="toggleConfirmContainer()" class="confirm-button">اضغط هنا للشراء</button>
 
-            <div class="confirm-container" id="confirmContainer">
-                <h2 class="confirm-title">تأكيد الطلب</h2>
-                <p id="initialMessage">اضغط على زر واتساب ب الأسفل لأرسال كود
-                    التحقق الخاص بك</p>
+        <div class="confirm-container" id="confirmContainer">
+            <h2 class="confirm-title">تأكيد الطلب</h2>
+            <p id="initialMessage">اضغط على زر واتساب ب الأسفل لأرسال كود
+                التحقق الخاص بك</p>
 
-                <!-- زر واتساب الأول -->
-                <a href="#" id="whatsappButton" class="confirm-whatsapp-btn"
-                    onclick="handleWhatsAppClick(event)">
-                    ارسال كود التحقق على واتساب
-                    <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                        class="whatsapp-icon" alt>
+            <!-- زر واتساب الأول -->
+            <a href="#" id="whatsappButton" class="confirm-whatsapp-btn" onclick="handleWhatsAppClick(event)">
+                ارسال كود التحقق على واتساب
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="whatsapp-icon" alt>
+            </a>
+
+            <!-- مدخل الكود + زر التأكيد -->
+            <div class="confirm-code-input" id="codeSection" style="display: none;">
+                <p>ادخل كود التحقق الخاص بك في الأسفل</p>
+                <input style="margin-bottom: 0px;" type="text" id="confirmationCode" placeholder="أدخل الكود هنا">
+                <input type="hidden" id="phoneNumber">
+                <br>
+                <p id="timer" style="margin-top: 0px;"></p>
+                <button onclick="verifyCode()" id="Confirmbtn" class="confirm-button">تأكيد الكود</button>
+                <p id="message" class="confirm-message"></p>
+
+                <!-- زر واتساب الثاني لإعادة المحاولة -->
+                <a href="#" id="retryWhatsApp" class="confirm-whatsapp-btn" style="display: none;"
+                    onclick="restartFlow(event)">
+                    ابدأ من جديد
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="whatsapp-icon"
+                        alt>
+
                 </a>
-
-                <!-- مدخل الكود + زر التأكيد -->
-                <div class="confirm-code-input" id="codeSection"
-                    style="display: none;">
-                    <p>ادخل كود التحقق الخاص بك في الأسفل</p>
-                    <input style="margin-bottom: 0px;" type="text"
-                        id="confirmationCode"
-                        placeholder="أدخل الكود هنا">
-                    <input type="hidden" id="phoneNumber">
-                    <br>
-                    <p id="timer" style="margin-top: 0px;"></p>
-                    <button onclick="verifyCode()" id="Confirmbtn"
-                        class="confirm-button">تأكيد الكود</button>
-                    <p id="message" class="confirm-message"></p>
-
-                    <!-- زر واتساب الثاني لإعادة المحاولة -->
-                    <a href="#" id="retryWhatsApp" class="confirm-whatsapp-btn"
-                        style="display: none;" onclick="restartFlow(event)">
-                        ابدأ من جديد
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                            class="whatsapp-icon" alt>
-
-                    </a>
-                </div>
             </div>
         </div>
-        <script> 
-            
-             async function getCurrentPhoneNumber() {
+    </div>
+    <script>
+
+        async function getCurrentPhoneNumber() {
             try {
                 console.log("from get curr");
                 const response = await fetch('https://easy-orders-webhook-y9aj.vercel.app/current-phone', {
@@ -161,153 +153,153 @@
             }
         }
 
-async function verifyCode() {
-    const phoneData = await getCurrentPhoneNumber();
-    console.log(phoneData);
-    const code = document.getElementById('confirmationCode').value;
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    const messageElement = document.getElementById('message');
-    const confirmBtn = document.getElementById('Confirmbtn');
+        async function verifyCode() {
+            const phoneData = await getCurrentPhoneNumber();
+            console.log(phoneData);
+            const code = document.getElementById('confirmationCode').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const messageElement = document.getElementById('message');
+            const confirmBtn = document.getElementById('Confirmbtn');
 
-    console.log("=======================> Phone Number: " + phoneNumber);
+            console.log("=======================> Phone Number: " + phoneNumber);
 
-    if (!phoneNumber) {
-        messageElement.textContent = 'رقم التليفون غير متوفر';
-        messageElement.style.color = 'red';
-        return;
-    }
-
-    if (!code) {
-        messageElement.textContent = 'يرجى إدخال كود التحقق';
-        messageElement.style.color = 'red';
-        return;
-    }
-
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = 'جاري التحقق...';
-
-    try {
-        const res = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
-        });
-        const result = await res.json();
-        if (result.success) {
-            messageElement.style.color = 'green';
-            messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
-            const confirmCard = document.querySelector('.card-confirm');
-            if (confirmCard) {
-                confirmCard.style.display = 'none';
+            if (!phoneNumber) {
+                messageElement.textContent = 'رقم التليفون غير متوفر';
+                messageElement.style.color = 'red';
+                return;
             }
 
-            const checkoutButtons = document.querySelectorAll('.form_checkout_btn, .checkout_buy_now');
-            checkoutButtons.forEach(btn => {
-                btn.style.display = 'inline-block';
-            });
-            document.querySelector('.form_checkout_btn')?.click();
-        } else {
-            messageElement.style.color = 'red';
-            // تحويل رسالة الخطأ إلى العربية
-            if (result.message === "Invalid confirmation code") {
-                messageElement.textContent = 'كود التحقق غير صحيح، يرجى المحاولة مرة أخرى';
-            } else {
-                messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
+            if (!code) {
+                messageElement.textContent = 'يرجى إدخال كود التحقق';
+                messageElement.style.color = 'red';
+                return;
+            }
+
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'جاري التحقق...';
+
+            try {
+                const res = await fetch('https://easy-orders-webhook-y9aj.vercel.app/webhook/verify', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    messageElement.style.color = 'green';
+                    messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
+                    const confirmCard = document.querySelector('.card-confirm');
+                    if (confirmCard) {
+                        confirmCard.style.display = 'none';
+                    }
+
+                    const checkoutButtons = document.querySelectorAll('.form_checkout_btn, .checkout_buy_now');
+                    checkoutButtons.forEach(btn => {
+                        btn.style.display = 'inline-block';
+                    });
+                    document.querySelector('.form_checkout_btn')?.click();
+                } else {
+                    messageElement.style.color = 'red';
+                    // تحويل رسالة الخطأ إلى العربية
+                    if (result.message === "Invalid confirmation code") {
+                        messageElement.textContent = 'كود التحقق غير صحيح، يرجى المحاولة مرة أخرى';
+                    } else {
+                        messageElement.textContent = result.message || 'كود التحقق غير صحيح، حاول مرة أخرى.';
+                    }
+                }
+            } catch (error) {
+                messageElement.style.color = 'red';
+                messageElement.textContent = 'حدث خطأ أثناء التحقق، حاول مرة أخرى.';
+                console.error('Error:', error);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'تأكيد الكود';
             }
         }
-    } catch (error) {
-        messageElement.style.color = 'red';
-        messageElement.textContent = 'حدث خطأ أثناء التحقق، حاول مرة أخرى.';
-        console.error('Error:', error);
-    } finally {
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'تأكيد الكود';
-    }
-}
         function toggleConfirmContainer() {
-  const container = document.getElementById('confirmContainer');
-  if (getComputedStyle(container).display === 'none') {
-    container.style.display = 'block';
-  } else {
-    container.style.display = 'none';
-  }
-}
-
-let timerInterval;
-
-function handleWhatsAppClick(event) {
-    event.preventDefault();
-
-    const phoneUrl = "https://wa.me/+201022549817?text=أريد%20طلب%20كود%20التحقق%20لتأكيد%20طلبي";
-    window.open(phoneUrl, '_blank');
-
-    // أخفي الرسالة والزر الأول وأظهر قسم الكود
-    document.getElementById('initialMessage').style.display = 'none';
-    document.getElementById('whatsappButton').style.display = 'none';
-    document.getElementById('codeSection').style.display = 'block';
-    // عرض الرسالة المؤقتة لمدة 5 ثواني
-    document.querySelector("#codeSection p").textContent = "اضغط على تطبيق الواتساب لإرسال كود التحقق";
-    
-    // بعد 5 ثواني، ابدأ العد التنازلي
-    setTimeout(() => {
-        document.querySelector("#codeSection p").textContent = "ادخل كود التحقق الخاص بك في الأسفل";
-        startCountdown(45);
-    }, 5000);
-}
-
-function startCountdown(seconds) {
-    const timerElement = document.getElementById('timer');
-    timerElement.style.color = '#555';
-    timerElement.textContent = `رمز التحقق صالح لمدة ${seconds} ثانية`;
-
-    let timeLeft = seconds;
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        timerElement.textContent = `رمز التحقق صالح لمدة ${timeLeft} ثانية`;
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerElement.textContent = "رمز التحقق انتهى";
-
-            // ✅ بدل النص بدلاً من إخفائه
-            document.querySelector("#codeSection p").textContent = "انتهت صلاحية الكود، اضغط على \"ابدأ من جديد\" لإرسال كود جديد";
-            // ✅ اخف زر تأكيد الكود فقط
-            document.getElementById('Confirmbtn').style.display = 'none';
-
-const retryBtn = document.getElementById('retryWhatsApp');
-retryBtn.style.display = 'flex';
-retryBtn.style.justifyContent = 'center';
-
+            const container = document.getElementById('confirmContainer');
+            if (getComputedStyle(container).display === 'none') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
         }
-    }, 1000);
-}
-function restartFlow(event) {
-    event.preventDefault();
 
-    const phoneUrl = "https://wa.me/+201022549817?text=أريد%20تأكيد%20الطلب";
-    window.open(phoneUrl, '_blank');
+        let timerInterval;
 
-    // إعادة ضبط الحقول والنصوص
-    document.getElementById('confirmationCode').value = '';
-    document.getElementById('message').textContent = '';
-    document.getElementById('retryWhatsApp').style.display = 'none';
-    document.getElementById('timer').textContent = '';
-    
-    // ✅ أعد نص التعليمات الأصلي
-    document.querySelector("#codeSection p").textContent = "ادخل كود التحقق الخاص بك في الأسفل";
+        function handleWhatsAppClick(event) {
+            event.preventDefault();
 
-    // ✅ أظهر زر تأكيد الكود مرة أخرى
-    document.getElementById('Confirmbtn').style.display = 'block';
+            const phoneUrl = "https://wa.me/+201022549817?text=أريد%20طلب%20كود%20التحقق%20لتأكيد%20طلبي";
+            window.open(phoneUrl, '_blank');
 
-    // ✅ أعد تشغيل العداد
-    startCountdown(45);
-}
+            // أخفي الرسالة والزر الأول وأظهر قسم الكود
+            document.getElementById('initialMessage').style.display = 'none';
+            document.getElementById('whatsappButton').style.display = 'none';
+            document.getElementById('codeSection').style.display = 'block';
+            // عرض الرسالة المؤقتة لمدة 5 ثواني
+            document.querySelector("#codeSection p").textContent = "اضغط على تطبيق الواتساب لإرسال كود التحقق";
 
-        </script>
-    </body>
+            // بعد 5 ثواني، ابدأ العد التنازلي
+            setTimeout(() => {
+                document.querySelector("#codeSection p").textContent = "ادخل كود التحقق الخاص بك في الأسفل";
+                startCountdown(45);
+            }, 5000);
+        }
+
+        function startCountdown(seconds) {
+            const timerElement = document.getElementById('timer');
+            timerElement.style.color = '#555';
+            timerElement.textContent = `رمز التحقق صالح لمدة ${seconds} ثانية`;
+
+            let timeLeft = seconds;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `رمز التحقق صالح لمدة ${timeLeft} ثانية`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.textContent = "رمز التحقق انتهى";
+
+                    // ✅ بدل النص بدلاً من إخفائه
+                    document.querySelector("#codeSection p").textContent = "انتهت صلاحية الكود، اضغط على \"ابدأ من جديد\" لإرسال كود جديد";
+                    // ✅ اخف زر تأكيد الكود فقط
+                    document.getElementById('Confirmbtn').style.display = 'none';
+
+                    const retryBtn = document.getElementById('retryWhatsApp');
+                    retryBtn.style.display = 'flex';
+                    retryBtn.style.justifyContent = 'center';
+
+                }
+            }, 1000);
+        }
+        function restartFlow(event) {
+            event.preventDefault();
+
+            const phoneUrl = "https://wa.me/+201022549817?text=أريد%20طلب%20كود%20التحقق%20لتأكيد%20طلبي";
+            window.open(phoneUrl, '_blank');
+
+            // إعادة ضبط الحقول والنصوص
+            document.getElementById('confirmationCode').value = '';
+            document.getElementById('message').textContent = '';
+            document.getElementById('retryWhatsApp').style.display = 'none';
+            document.getElementById('timer').textContent = '';
+
+            // ✅ أعد نص التعليمات الأصلي
+            document.querySelector("#codeSection p").textContent = "ادخل كود التحقق الخاص بك في الأسفل";
+
+            // ✅ أظهر زر تأكيد الكود مرة أخرى
+            document.getElementById('Confirmbtn').style.display = 'block';
+
+            // ✅ أعد تشغيل العداد
+            startCountdown(45);
+        }
+
+    </script>
+</body>
 
 </html>
