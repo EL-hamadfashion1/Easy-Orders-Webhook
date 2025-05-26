@@ -63,7 +63,7 @@ app.post("/webhook/meta", async (req, res) => {
 
         console.log(`Message received from ${phoneNumber}: ${messageText}`);
 
-        if (messageText === "أريد تأكيد الطلب") {
+        if (messageText === "أريد طلب كود التحقق لتأكيد طلبي") {
           // تحديث رقم الهاتف الحالي
           currentPhoneNumber = phoneNumber;
           console.log("=><><><><========= " + currentPhoneNumber);
@@ -96,7 +96,28 @@ app.post("/webhook/meta", async (req, res) => {
             JSON.stringify(response.data, null, 2)
           );
         } else {
-          console.log(`Message "${messageText}" does not match expected text`);
+          // إرسال رسالة للعميل عشان يبعت النص الصحيح
+          const errorMessagePayload = {
+            messaging_product: "whatsapp",
+            to: phoneNumber,
+            type: "text",
+            text: {
+              body: `الرسالة غير صحيحة، يرجى إرسال "أريد طلب كود التحقق لتأكيد طلبي" للحصول على كود التأكيد.`,
+            },
+          };
+
+          const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+          const response = await axios.post(url, errorMessagePayload, {
+            headers: {
+              Authorization: `Bearer ${ACCESS_TOKEN}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log(
+            "Error message sent successfully:",
+            JSON.stringify(response.data, null, 2)
+          );
         }
       } else if (value.statuses && value.statuses[0]) {
         const status = value.statuses[0];
@@ -339,7 +360,36 @@ app.post("/webhook/easy-orders", async (req, res) => {
       address: address || "غير محدد",
       country: country || "غير محدد",
     });
-    const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
+    // بناء تفاصيل المنتجات ككلام عادي
+    let itemsText = "";
+    itemsDetailsForUrl.forEach((item) => {
+      itemsText += `- ${item.product}, عدد القطع: ${item.quantity}\n  اللون: ${item.color}\n  المقاس: ${item.size}\n السعر للقطعة الواحدة: ${item.price} ج.م\n\n`;
+    });
+
+    // بناء نص الرسالة بنفس البيانات
+    const messageTextForWhatsApp =
+      `تفاصيل الطلب:\n\n` +
+      `الاسم: ${full_name || "العميل العزيز"}\n` +
+      `رقم الهاتف: ${phone}\n` +
+      `رقم إضافي: ${phone_alt || "غير متوفر"}\n` +
+      `المنتجات:\n${itemsText}` +
+      `الشحن: ${
+        effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني"
+      } ج.م\n` +
+      `الإجمالي: ${
+        total_cost !== undefined && total_cost !== null
+          ? total_cost
+          : "غير محدد"
+      } ج.م\n` +
+      `المحافظة: ${government || "غير محدد"}\n` +
+      `المنطقة: ${country || "غير محدد"}\n` +
+      `العنوان: ${address || "غير محدد"}`;
+
+    const encodedMessage = encodeURIComponent(messageTextForWhatsApp);
+    const redirectUrl = `https://wa.me/201016908760?text=${encodedMessage}`;
+
+    // old redirect URL
+    // const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
     // الرسالة الرئيسية
     const messageText = `مرحبًا بك ${
@@ -353,7 +403,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
     }\n العنوان بالتفصيل:${address}\n\nبرجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
 
     // الرسالة النهائية
-    const finalMessage = messageText;
+    // const finalMessage = messageText;
 
     // التحقق من currentPhoneNumber
     if (!currentPhoneNumber) {
@@ -374,7 +424,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
       to: phone,
       type: "text",
       text: {
-        body: finalMessage,
+        body: `مرحبا بك ${fullName}🌸\n\nيرجى تتبع المعلومات لتأكيد طلبك واستكماله بنجاح✅\n\nلضمان تأكيد طلبك وخروج الطلب مع شركة الشحن في أسرع وقت🚚\n\nاضغطي على الرابط هنا لإرسال بيانات طلبك👇👇\n${redirectUrl}`,
       },
     };
 
