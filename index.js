@@ -63,7 +63,7 @@ app.post("/webhook/meta", async (req, res) => {
 
         console.log(`Message received from ${phoneNumber}: ${messageText}`);
 
-        if (messageText === "اريد طلب كود التحقق لتأكيد طلبي") {
+        if (messageText === "اريد طلب كود التحقق لتاكيد طلبي") {
           // تحديث رقم الهاتف الحالي
           currentPhoneNumber = phoneNumber;
           console.log("=><><><><========= " + currentPhoneNumber);
