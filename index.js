@@ -346,20 +346,20 @@ app.post("/webhook/easy-orders", async (req, res) => {
         ? `الإجمالي: ${total_cost} ج.م`
         : "الإجمالي: غير محدد";
 
-    const queryParams = new URLSearchParams({
-      full_name: full_name || "العميل العزيز",
-      phone: phone,
-      phone_alt: phone_alt || "غير متوفر",
-      items: JSON.stringify(itemsDetailsForUrl), // تفاصيل المنتجات كـJSON
-      shipping: effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني",
-      total:
-        total_cost !== undefined && total_cost !== null
-          ? total_cost
-          : "غير محدد",
-      government: government || "غير محدد",
-      address: address || "غير محدد",
-      country: country || "غير محدد",
-    });
+    // const queryParams = new URLSearchParams({
+    //   full_name: full_name || "العميل العزيز",
+    //   phone: phone,
+    //   phone_alt: phone_alt || "غير متوفر",
+    //   items: JSON.stringify(itemsDetailsForUrl), // تفاصيل المنتجات كـJSON
+    //   shipping: effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني",
+    //   total:
+    //     total_cost !== undefined && total_cost !== null
+    //       ? total_cost
+    //       : "غير محدد",
+    //   government: government || "غير محدد",
+    //   address: address || "غير محدد",
+    //   country: country || "غير محدد",
+    // });
     // بناء تفاصيل المنتجات ككلام عادي
     let itemsText = "";
     itemsDetailsForUrl.forEach((item) => {
@@ -392,15 +392,15 @@ app.post("/webhook/easy-orders", async (req, res) => {
     // const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
     // الرسالة الرئيسية
-    const messageText = `مرحبًا بك ${
-      full_name || "العميل العزيز"
-    }\nرقم الهاتف: ${phone}\nرقم إضافي: ${
-      phone_alt || "غير متوفر"
-    }\n\nتفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\nالمحافظة: ${
-      government || "غير محدد"
-    }\nالمنطقه: ${
-      country || "غير محدد"
-    }\n العنوان بالتفصيل:${address}\n\nبرجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
+    // const messageText = `مرحبًا بك ${
+    //   full_name || "العميل العزيز"
+    // }\nرقم الهاتف: ${phone}\nرقم إضافي: ${
+    //   phone_alt || "غير متوفر"
+    // }\n\nتفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\nالمحافظة: ${
+    //   government || "غير محدد"
+    // }\nالمنطقه: ${
+    //   country || "غير محدد"
+    // }\n العنوان بالتفصيل:${address}\n\nبرجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
 
     // الرسالة النهائية
     // const finalMessage = messageText;
@@ -424,7 +424,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
       to: phone,
       type: "text",
       text: {
-        body: `مرحبا بك ${fullName}🌸\n\nيرجى تتبع المعلومات لتأكيد طلبك واستكماله بنجاح✅\n\nلضمان تأكيد طلبك وخروج الطلب مع شركة الشحن في أسرع وقت🚚\n\nاضغطي على الرابط هنا لإرسال بيانات طلبك👇👇\n${redirectUrl}`,
+        body: `مرحبا بك ${full_name}🌸\n\nيرجى تتبع المعلومات لتأكيد طلبك واستكماله بنجاح✅\n\nلضمان تأكيد طلبك وخروج الطلب مع شركة الشحن في أسرع وقت🚚\n\nاضغطي على الرابط هنا لإرسال بيانات طلبك👇👇\n${redirectUrl}`,
       },
     };
 
