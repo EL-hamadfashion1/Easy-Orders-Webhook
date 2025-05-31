@@ -159,9 +159,11 @@
             const phoneData = await getCurrentPhoneNumber();
             console.log(phoneData);
             const code = document.getElementById('confirmationCode').value;
+            const easyOrderPhoneNumber = document.querySelector('input[name="phone"]').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const messageElement = document.getElementById('message');
             const confirmBtn = document.getElementById('Confirmbtn');
+            console.log(easyOrderPhoneNumber);
 
             console.log("=======================> Phone Number: " + phoneNumber);
 
@@ -187,7 +189,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ phone_number: phoneNumber, entered_code: code })
+                    body: JSON.stringify({easyOrder_PhoneNumber: easyOrderPhoneNumber, phone_number: phoneNumber, entered_code: code })
                 });
                 const result = await res.json();
                 if (result.success) {
