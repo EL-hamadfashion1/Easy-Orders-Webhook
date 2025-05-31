@@ -76,7 +76,9 @@ app.post("/webhook/meta", async (req, res) => {
             messaging_product: "whatsapp",
             to: phoneNumber,
             type: "text",
-            text: { body: `كود تأكيد طلبك هو: ${confirmationCode}` },
+            text: {
+              body: `ادخل كود التحقق هذا علي الويب سايت لتاكيد الطلب: ${confirmationCode}`,
+            },
           };
 
           console.log(
@@ -351,20 +353,20 @@ app.post("/webhook/easy-orders", async (req, res) => {
         ? `الإجمالي: ${total_cost} ج.م`
         : "الإجمالي: غير محدد";
 
-    // const queryParams = new URLSearchParams({
-    //   full_name: full_name || "العميل العزيز",
-    //   phone: phone,
-    //   phone_alt: phone_alt || "غير متوفر",
-    //   items: JSON.stringify(itemsDetailsForUrl), // تفاصيل المنتجات كـJSON
-    //   shipping: effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني",
-    //   total:
-    //     total_cost !== undefined && total_cost !== null
-    //       ? total_cost
-    //       : "غير محدد",
-    //   government: government || "غير محدد",
-    //   address: address || "غير محدد",
-    //   country: country || "غير محدد",
-    // });
+    const queryParams = new URLSearchParams({
+      full_name: full_name || "العميل العزيز",
+      phone: phone,
+      phone_alt: phone_alt || "غير متوفر",
+      items: JSON.stringify(itemsDetailsForUrl), // تفاصيل المنتجات كـJSON
+      shipping: effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني",
+      total:
+        total_cost !== undefined && total_cost !== null
+          ? total_cost
+          : "غير محدد",
+      government: government || "غير محدد",
+      address: address || "غير محدد",
+      country: country || "غير محدد",
+    });
     // بناء تفاصيل المنتجات ككلام عادي
     let itemsText = "";
     itemsDetailsForUrl.forEach((item) => {
@@ -390,11 +392,11 @@ app.post("/webhook/easy-orders", async (req, res) => {
       `المنطقة: ${country || "غير محدد"}\n` +
       `العنوان: ${address || "غير محدد"}`;
 
-    const encodedMessage = encodeURIComponent(messageTextForWhatsApp);
-    const redirectUrl = `https://wa.me/201016908760?text=${encodedMessage}`;
+    // const encodedMessage = encodeURIComponent(messageTextForWhatsApp);
+    // const redirectUrl = `https://wa.me/201016908760?text=${encodedMessage}`;
 
-    // old redirect URL
-    // const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
+    //old redirect URL
+    const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
     // الرسالة الرئيسية
     // const messageText = `مرحبًا بك ${
