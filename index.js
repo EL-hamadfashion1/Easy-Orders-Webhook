@@ -63,7 +63,7 @@ app.post("/webhook/meta", async (req, res) => {
 
         console.log(`Message received from ${phoneNumber}: ${messageText}`);
 
-        if (messageText === "أريد طلب كود التحقق لتأكيد طلبي") {
+        if (messageText === "اريد طلب كود التحقق لتاكيد طلبي") {
           // تحديث رقم الهاتف الحالي
           currentPhoneNumber = phoneNumber;
           console.log("=><><><><========= " + currentPhoneNumber);
@@ -76,7 +76,9 @@ app.post("/webhook/meta", async (req, res) => {
             messaging_product: "whatsapp",
             to: phoneNumber,
             type: "text",
-            text: { body: `كود تأكيد طلبك هو: ${confirmationCode}` },
+            text: {
+              body: `ادخل كود التحقق هذا علي الويب سايت لتاكيد الطلب: ${confirmationCode}`,
+            },
           };
 
           console.log(
@@ -102,7 +104,12 @@ app.post("/webhook/meta", async (req, res) => {
             to: phoneNumber,
             type: "text",
             text: {
-              body: `الرسالة غير صحيحة، يرجى إرسال "أريد طلب كود التحقق لتأكيد طلبي" للحصول على كود التأكيد.`,
+              body: `الرسالة غير صحيحة❌
+
+يرجى إرسال الكلمه دي👇👇
+اريد طلب كود التحقق لتاكيد طلبي
+
+للحصول على كود التحقق  للتاكيد`,
             },
           };
 
@@ -385,22 +392,22 @@ app.post("/webhook/easy-orders", async (req, res) => {
       `المنطقة: ${country || "غير محدد"}\n` +
       `العنوان: ${address || "غير محدد"}`;
 
-    const encodedMessage = encodeURIComponent(messageTextForWhatsApp);
-    const redirectUrl = `https://wa.me/201016908760?text=${encodedMessage}`;
+    // const encodedMessage = encodeURIComponent(messageTextForWhatsApp);
+    // const redirectUrl = `https://wa.me/201016908760?text=${encodedMessage}`;
 
-    // old redirect URL
-    // const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
+    //old redirect URL
+    const redirectUrl = `https://easy-orders-webhook-y9aj.vercel.app/track-order?${queryParams.toString()}`;
 
     // الرسالة الرئيسية
-    const messageText = `مرحبًا بك ${
-      full_name || "العميل العزيز"
-    }\nرقم الهاتف: ${phone}\nرقم إضافي: ${
-      phone_alt || "غير متوفر"
-    }\n\nتفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\nالمحافظة: ${
-      government || "غير محدد"
-    }\nالمنطقه: ${
-      country || "غير محدد"
-    }\n العنوان بالتفصيل:${address}\n\nبرجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
+    // const messageText = `مرحبًا بك ${
+    //   full_name || "العميل العزيز"
+    // }\nرقم الهاتف: ${phone}\nرقم إضافي: ${
+    //   phone_alt || "غير متوفر"
+    // }\n\nتفاصيل طلبك:\n${itemsDetails}${shippingLine}${totalLine}\n\nالمحافظة: ${
+    //   government || "غير محدد"
+    // }\nالمنطقه: ${
+    //   country || "غير محدد"
+    // }\n العنوان بالتفصيل:${address}\n\nبرجاء الضغط علي اللينك في الاسفل لارسال بيانات الطلب وتاكيد خروج الطلب مع شركه الشحن:\n${redirectUrl}`;
 
     // الرسالة النهائية
     // const finalMessage = messageText;
@@ -424,7 +431,7 @@ app.post("/webhook/easy-orders", async (req, res) => {
       to: phone,
       type: "text",
       text: {
-        body: `مرحبا بك ${fullName}🌸\n\nيرجى تتبع المعلومات لتأكيد طلبك واستكماله بنجاح✅\n\nلضمان تأكيد طلبك وخروج الطلب مع شركة الشحن في أسرع وقت🚚\n\nاضغطي على الرابط هنا لإرسال بيانات طلبك👇👇\n${redirectUrl}`,
+        body: `مرحبا بك ${full_name}🌸\n\nيرجى تتبع المعلومات لتأكيد طلبك واستكماله بنجاح✅\n\nلضمان تأكيد طلبك وخروج الطلب مع شركة الشحن في أسرع وقت🚚\n\nاضغطي على الرابط هنا لإرسال بيانات طلبك👇👇\n${redirectUrl}`,
       },
     };
 
