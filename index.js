@@ -167,7 +167,7 @@ app.post("/webhook/verify", async (req, res) => {
     if (easyOrder_PhoneNumber !== phone_number){
       return res.status(400).json({
         success: false,
-        message: "يجب تطابق رقم الهاتف الذي استلمت من خلال كود التحقق برقم الهاتف في الطلب",
+        message: "يجب تطابق رقم الهاتف الذي استلمت من خلاله كود التحقق برقم الهاتف في الطلب",
       });
     }
 
