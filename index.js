@@ -156,12 +156,18 @@ app.post("/webhook/verify", async (req, res) => {
   try {
     console.log("Received verify payload:", req.body);
     const body = req.body || {};
-    const { phone_number, entered_code } = body;
+    const { phone_number, entered_code,easyOrder_PhoneNumber } = body;
 
-    if (!phone_number || !entered_code) {
+    if (!phone_number || !entered_code || !easyOrder_PhoneNumber) {
       return res.status(400).json({
         success: false,
         message: "Missing phone_number or entered_code",
+      });
+    }
+    if (easyOrder_PhoneNumber !== phone_number){
+      return res.status(400).json({
+        success: false,
+        message: "يجب تطابق رقم الهاتف الذي استلمت من خلال كود التحقق برقم الهاتف في الطلب",
       });
     }
 
