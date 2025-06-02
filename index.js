@@ -156,7 +156,7 @@ app.post("/webhook/verify", async (req, res) => {
   try {
     console.log("Received verify payload:", req.body);
     const body = req.body || {};
-    const { phone_number, entered_code,easyOrder_PhoneNumber } = body;
+    const { phone_number, entered_code, easyOrder_PhoneNumber } = body;
 
     if (!phone_number || !entered_code || !easyOrder_PhoneNumber) {
       return res.status(400).json({
@@ -164,16 +164,23 @@ app.post("/webhook/verify", async (req, res) => {
         message: "Missing phone_number or entered_code",
       });
     }
-    if (easyOrder_PhoneNumber !== phone_number){
+    console.log("before condition" + easyOrder_PhoneNumber !== phone_number);
+    console.log("typeof(PhoneNumber)" + typeof(phone_number));
+    console.log("typeof(easyOrder_PhoneNumber)" + typeof(easyOrder_PhoneNumber));
+
+    if (easyOrder_PhoneNumber !== phone_number) {
+      console.log("Easy order phone number condition" + easyOrder_PhoneNumber);
       return res.status(400).json({
         success: false,
         message: "يجب تطابق رقم الهاتف الذي استلمت من خلاله كود التحقق برقم الهاتف في الطلب",
       });
+
     }
 
     console.log(confirmationCodes);
     console.log("--------> " + phone_number);
     console.log("-----" + confirmationCodes[phone_number]);
+    console.log("Easy order phone number" + easyOrder_PhoneNumber);
 
     if (!confirmationCodes[phone_number]) {
       return res.status(400).json({
@@ -386,13 +393,11 @@ app.post("/webhook/easy-orders", async (req, res) => {
       `رقم الهاتف: ${phone}\n` +
       `رقم إضافي: ${phone_alt || "غير متوفر"}\n` +
       `المنتجات:\n${itemsText}` +
-      `الشحن: ${
-        effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني"
+      `الشحن: ${effectiveShippingCost > 0 ? effectiveShippingCost : "مجاني"
       } ج.م\n` +
-      `الإجمالي: ${
-        total_cost !== undefined && total_cost !== null
-          ? total_cost
-          : "غير محدد"
+      `الإجمالي: ${total_cost !== undefined && total_cost !== null
+        ? total_cost
+        : "غير محدد"
       } ج.م\n` +
       `المحافظة: ${government || "غير محدد"}\n` +
       `المنطقة: ${country || "غير محدد"}\n` +
@@ -463,9 +468,8 @@ app.post("/webhook/easy-orders", async (req, res) => {
       const errorDetails = error.response.data?.error || {};
 
       if (status === 400) {
-        detailedMessage = `Bad request to WhatsApp API: ${
-          errorDetails.message || "Invalid payload"
-        }`;
+        detailedMessage = `Bad request to WhatsApp API: ${errorDetails.message || "Invalid payload"
+          }`;
       } else if (status === 401) {
         detailedMessage = "Authentication failed: Check your ACCESS_TOKEN";
       } else if (status === 404) {
@@ -474,9 +478,8 @@ app.post("/webhook/easy-orders", async (req, res) => {
         detailedMessage =
           "Rate limit exceeded: Too many requests to WhatsApp API";
       } else {
-        detailedMessage = `Unexpected error from WhatsApp API: ${
-          errorDetails.message || "Unknown error"
-        }`;
+        detailedMessage = `Unexpected error from WhatsApp API: ${errorDetails.message || "Unknown error"
+          }`;
       }
     } else if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
       detailedMessage = "Network error: Could not connect to WhatsApp API";
