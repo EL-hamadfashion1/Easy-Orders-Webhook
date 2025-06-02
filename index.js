@@ -174,7 +174,6 @@ app.post("/webhook/verify", async (req, res) => {
         success: false,
         message: "يجب تطابق رقم الهاتف الذي استلمت من خلاله كود التحقق برقم الهاتف في الطلب",
       });
-
     }
 
     console.log(confirmationCodes);
