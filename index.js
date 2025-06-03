@@ -71,7 +71,9 @@ app.post("/webhook/meta", async (req, res) => {
             1000 + Math.random() * 9000
           ).toString();
           confirmationCodes[phoneNumber] = confirmationCode;
-
+          console.log(
+            `Stored confirmation code for ${phoneNumber}: ${confirmationCode}`
+          ); // تسجيل الكود
           const messagePayload = {
             messaging_product: "whatsapp",
             to: phoneNumber,
@@ -168,7 +170,11 @@ app.post("/webhook/verify", async (req, res) => {
     console.log("typeof(PhoneNumber)" + typeof phone_number);
     console.log("typeof(easyOrder_PhoneNumber)" + typeof easyOrder_PhoneNumber);
 
-    if (easyOrder_PhoneNumber !== phone_number) {
+    console.log(
+      `Comparing phone numbers: easyOrder_PhoneNumber=${easyOrder_PhoneNumber}, phone_number=${phone_number}`
+    );
+    if (String(easyOrder_PhoneNumber) !== String(phone_number)) {
+      console.log("Phone number mismatch");
       console.log("Easy order phone number condition" + easyOrder_PhoneNumber);
       return res.status(400).json({
         success: false,
@@ -176,6 +182,10 @@ app.post("/webhook/verify", async (req, res) => {
           "يجب تطابق رقم الهاتف الذي استلمت من خلاله كود التحقق برقم الهاتف في الطلب",
       });
     }
+    console.log("Stored confirmation codes:", confirmationCodes);
+    console.log(
+      `Checking code for ${phone_number}: stored=${confirmationCodes[phone_number]}, entered=${entered_code}`
+    );
 
     console.log(confirmationCodes);
     console.log("--------> " + phone_number);
@@ -183,13 +193,16 @@ app.post("/webhook/verify", async (req, res) => {
     console.log("Easy order phone number" + easyOrder_PhoneNumber);
 
     if (!confirmationCodes[phone_number]) {
+      console.log(`No confirmation code found for ${phone_number}`);
       return res.status(400).json({
         success: false,
         message: "No confirmation code found for this phone number",
       });
     }
-
-    if (confirmationCodes[phone_number] === entered_code) {
+    console.log(
+      `Comparing Confirmation Codes: enterd_code=${easyOrder_PhoneNumber}, stored confirm code=${confirmationCodes[phone_number]}`
+    );
+    if (String(confirmationCodes[phone_number]) === String(entered_code)) {
       console.log("Code verified for", phone_number);
       // جلب phoneNumberId عشان نستخدمه في إرسال الرسالة
       const phoneNumberId = phoneNumberIds[phone_number];

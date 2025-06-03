@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>تأكيد الطلب</title>
-        <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأكيد الطلب</title>
+    <style>
         .whatsapp-icon {
             width: 20px;
             height: 20px;
@@ -91,56 +91,46 @@
             color: #333;
         }
     </style>
-    </head>
+</head>
 
-    <body>
-        <div class="card-confirm">
-            <!-- زر الشراء -->
-            <button onclick="toggleConfirmContainer()"
-                class="confirm-button">اضغط هنا للشراء</button>
+<body>
+    <div class="card-confirm">
+        <!-- زر الشراء -->
+        <button onclick="toggleConfirmContainer()" class="confirm-button">اضغط هنا للشراء</button>
 
-            <div class="confirm-container" id="confirmContainer">
-                <h2 class="confirm-title">تأكيد الطلب</h2>
-                <p id="initialMessage">اضغط على زر واتساب ب الأسفل لأرسال كود
-                    التحقق الخاص بك</p>
+        <div class="confirm-container" id="confirmContainer">
+            <h2 class="confirm-title">تأكيد الطلب</h2>
+            <p id="initialMessage">اضغط على زر واتساب ب الأسفل لأرسال كود
+                التحقق الخاص بك</p>
 
-                <!-- زر واتساب الأول -->
-                <a href="#" id="whatsappButton" class="confirm-whatsapp-btn"
-                    onclick="handleWhatsAppClick(event)">
-                    ارسال كود التحقق على واتساب
-                    <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                        class="whatsapp-icon" alt>
+            <!-- زر واتساب الأول -->
+            <a href="#" id="whatsappButton" class="confirm-whatsapp-btn" onclick="handleWhatsAppClick(event)">
+                ارسال كود التحقق على واتساب
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="whatsapp-icon" alt>
+            </a>
+
+            <!-- مدخل الكود + زر التأكيد -->
+            <div class="confirm-code-input" id="codeSection" style="display: none;">
+                <p>ادخل كود التحقق الخاص بك في الأسفل</p>
+                <input style="margin-bottom: 0px;" type="text" id="confirmationCode" placeholder="أدخل الكود هنا">
+                <input type="hidden" id="phoneNumber">
+                <br>
+                <p id="timer" style="margin-top: 0px;"></p>
+                <button onclick="verifyCode()" id="Confirmbtn" class="confirm-button">تأكيد الكود</button>
+                <p id="message" class="confirm-message"></p>
+
+                <!-- زر واتساب الثاني لإعادة المحاولة -->
+                <a href="#" id="retryWhatsApp" class="confirm-whatsapp-btn" style="display: none;"
+                    onclick="restartFlow(event)">
+                    ابدأ من جديد
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="whatsapp-icon"
+                        alt>
+
                 </a>
-
-                <!-- مدخل الكود + زر التأكيد -->
-                <div class="confirm-code-input" id="codeSection"
-                    style="display: none;">
-                    <p>ادخل كود التحقق الخاص بك في الأسفل</p>
-                    <input style="margin-bottom: 0px;" type="text"
-                        id="confirmationCode" placeholder="أدخل الكود هنا">
-                    <input type="hidden" id="phoneNumber">
-                    <br>
-                    <p id="timer" style="margin-top: 0px;"></p>
-                    <button onclick="verifyCode()" id="Confirmbtn"
-                        class="confirm-button">تأكيد الكود</button>
-                    <p id="message" class="confirm-message"></p>
-
-                    <!-- زر واتساب الثاني لإعادة المحاولة -->
-                    <a href="#" id="retryWhatsApp" class="confirm-whatsapp-btn"
-                        style="display: none;"
-                        onclick="restartFlow(event)">
-                        ابدأ من جديد
-                        <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                            class="whatsapp-icon"
-                            alt>
-
-                    </a>
-                </div>
             </div>
         </div>
-        <script>
+    </div>
+    <script>
 
         async function getCurrentPhoneNumber() {
             try {
@@ -175,6 +165,8 @@
             const confirmBtn = document.getElementById('Confirmbtn');
             console.log(easyOrderPhoneNumber);
 
+            console.log(`Verifying code: phone=${phoneNumber}, easyOrderPhoneNumber=${easyOrderPhoneNumber}, code=${code}`);
+
             console.log("=======================> Phone Number: " + phoneNumber);
 
             if (!phoneNumber) {
@@ -199,25 +191,26 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({easyOrder_PhoneNumber: easyOrderPhoneNumber, phone_number: phoneNumber, entered_code: code })
+                    body: JSON.stringify({ easyOrder_PhoneNumber: easyOrderPhoneNumber, phone_number: phoneNumber, entered_code: code })
                 });
                 const result = await res.json();
+                console.log("Verification response:", result); // تسجيل رد الخادم
                 if (res.ok && result.success) {
 
-                messageElement.style.color = 'green';
-                messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
-                
-                const confirmCard = document.querySelector('.card-confirm');
-                if (confirmCard) {
-                    confirmCard.style.display = 'none';
-                }
+                    messageElement.style.color = 'green';
+                    messageElement.textContent = 'تم تأكيد الطلب بنجاح! تحقق من واتساب للحصول على تفاصيل الطلب.';
 
-                const checkoutButtons = document.querySelectorAll('.form_checkout_btn, .checkout_buy_now');
-                checkoutButtons.forEach(btn => {
-                    btn.style.display = 'inline-block';
-                });
+                    const confirmCard = document.querySelector('.card-confirm');
+                    if (confirmCard) {
+                        confirmCard.style.display = 'none';
+                    }
 
-                document.querySelector('.form_checkout_btn')?.click();
+                    const checkoutButtons = document.querySelectorAll('.form_checkout_btn, .checkout_buy_now');
+                    checkoutButtons.forEach(btn => {
+                        btn.style.display = 'inline-block';
+                    });
+
+                    document.querySelector('.form_checkout_btn')?.click();
 
                 } else {
                     messageElement.style.color = 'red';
@@ -303,7 +296,7 @@
 
 
 
-            
+
             // إعادة ضبط الحقول والنصوص
             document.getElementById('confirmationCode').value = '';
             document.getElementById('message').textContent = '';
@@ -321,6 +314,6 @@
         }
 
     </script>
-    </body>
+</body>
 
 </html>
