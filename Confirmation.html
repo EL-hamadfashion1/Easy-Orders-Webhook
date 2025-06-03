@@ -140,9 +140,18 @@
                 });
                 const data = await response.json();
                 console.log("from get curr res", data);
+
+                const phoneNumberInput = document.getElementById('phoneNumber');
+                if (!phoneNumberInput) {
+                    console.error("Element with ID 'phoneNumber' not found in the DOM");
+                    document.getElementById('message').textContent = 'خطأ: حقل رقم الهاتف غير موجود';
+                    document.getElementById('message').style.color = 'red';
+                    return {};
+                }
+
                 if (data.phone_number) {
-                    document.getElementById('phoneNumber').value = data.phone_number;
-                    console.log("number in hiddent filed"+document.getElementById('phoneNumber').value);
+                    phoneNumberInput.value = data.phone_number;
+                    console.log("number in hidden field: ", phoneNumberInput.value);
                     return data;
                 }
                 return {};
@@ -158,18 +167,21 @@
 
         async function verifyCode() {
             const phoneData = await getCurrentPhoneNumber();
-            console.log(phoneData);
+            console.log("PhoneData: " + phoneData);
             const code = document.getElementById('confirmationCode').value;
-            const easyOrderPhoneNumber = document.querySelector('input[name="phone"]').value;
+            const easyOrderPhoneNumber = "2" + document.querySelector('input[name="phone"]').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const messageElement = document.getElementById('message');
             const confirmBtn = document.getElementById('Confirmbtn');
-            console.log(easyOrderPhoneNumber);
-
+            console.log(`easyOrderPhoneNumber: ${easyOrderPhoneNumber}`);
             console.log(`Verifying code: phone=${phoneNumber}, easyOrderPhoneNumber=${easyOrderPhoneNumber}, code=${code}`);
-
             console.log("=======================> Phone Number: " + phoneNumber);
-
+            // التحقق من تطابق phoneNumber و easyOrderPhoneNumber
+            if (String(phoneNumber) !== String(easyOrderPhoneNumber)) {
+                messageElement.textContent = 'يجب تطابق رقم الهاتف الذي استلمت من خلاله كود التحقق برقم الهاتف في الطلب';
+                messageElement.style.color = 'red';
+                return;
+            }
             if (!phoneNumber) {
                 messageElement.textContent = 'رقم التليفون غير متوفر';
                 messageElement.style.color = 'red';
