@@ -170,7 +170,7 @@ app.post("/webhook/verify", async (req, res) => {
     console.log("typeof(PhoneNumber)" + typeof phone_number);
     console.log("typeof(easyOrder_PhoneNumber)" + typeof easyOrder_PhoneNumber);
 
-    console.log(
+    console.log(//01224309198 -- 20124309198
       `Comparing phone numbers: easyOrder_PhoneNumber=${easyOrder_PhoneNumber}, phone_number=${phone_number}`
     );
     if (String(easyOrder_PhoneNumber) !== String(phone_number)) {

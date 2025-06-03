@@ -142,6 +142,7 @@
                 console.log("from get curr res", data);
                 if (data.phone_number) {
                     document.getElementById('phoneNumber').value = data.phone_number;
+                    console.log("number in hiddent filed"+document.getElementById('phoneNumber').value);
                     return data;
                 }
                 return {};
