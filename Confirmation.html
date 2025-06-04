@@ -164,7 +164,6 @@
         }
 
 
-
         async function verifyCode() {
             const phoneData = await getCurrentPhoneNumber();
             console.log("PhoneData: " + phoneData);
@@ -208,6 +207,7 @@
                 });
                 const result = await res.json();
                 console.log("Verification response:", result); // تسجيل رد الخادم
+
                 if (res.ok && result.success) {
 
                     messageElement.style.color = 'green';
@@ -243,6 +243,8 @@
                 confirmBtn.textContent = 'تأكيد الكود';
             }
         }
+        
+        
         function toggleConfirmContainer() {
             const container = document.getElementById('confirmContainer');
             if (getComputedStyle(container).display === 'none') {
