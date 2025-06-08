@@ -163,6 +163,7 @@
             }
         }
 
+    
 
         async function verifyCode() {
             const phoneData = await getCurrentPhoneNumber();
@@ -243,8 +244,7 @@
                 confirmBtn.textContent = 'تأكيد الكود';
             }
         }
-        
-        
+
         function toggleConfirmContainer() {
             const container = document.getElementById('confirmContainer');
             if (getComputedStyle(container).display === 'none') {
