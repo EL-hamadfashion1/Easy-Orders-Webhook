@@ -571,7 +571,7 @@ app.get("/track-order", (req, res) => {
     const totalLine =
       total !== "غير محدد" ? `الإجمالي: ${total} ج.م` : "الإجمالي: غير محدد";
 
-    const messageText = `مرحبًا بك ${full_name}\n رقم الهاتف: ${phone}\n رقم إضافي: ${phone_alt}\n\n تفاصيل طلبك:\n${itemsText}${shippingLine}\n${totalLine}\n\n المحافظة: ${government}\n العنوان: ${country}\n العنوان بالتفصيل: ${address}\n\n`;
+    const messageText = `مرحبًا بك ${full_name}\n رقم الهاتف: ${phone}\n رقم إضافي: ${phone_alt}\n\n تفاصيل طلبك:\n${itemsText}${shippingLine}\n${totalLine}\n\n المحافظة: ${government}\n المنطقة: ${country}\n العنوان بالتفصيل: ${address}\n\n`;
 
     // إنشاء الرابط النهائي لـwa.me
     const whatsappUrl = `https://wa.me/201016908760?text=${encodeURIComponent(
